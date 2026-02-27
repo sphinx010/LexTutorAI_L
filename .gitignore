@@ -1,0 +1,42 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# testing
+coverage/
+lh-report.json
+
+# next.js
+.next/
+out/
+build/
+
+# misc
+.DS_Store
+*.pem
+
+# debug & artifacts
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+content.html
+content2.html
+
+# local env files
+.env*.local
+.env
+
+# vercel
+.vercel/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# generated folders (Optional: safe to ignore for pure codebase pushes)
+# ORDERS/
+# images/
+# sample_page/
+sample_page/

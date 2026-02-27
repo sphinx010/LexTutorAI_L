@@ -1,0 +1,500 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+
+    --radius: 0.5rem;
+
+    /* Custom Theme Variables */
+    --font-heading: "Playfair Display", serif;
+    --font-body: "Geist Sans", sans-serif;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* font-feature-settings: "rlig" 1, "calt" 1; */
+    /* Removed explicit font-family here, managed by Next.js font injection usually or variables */
+  }
+
+  /* Smooth Scroll behavior if not using Lenis, but Lenis is preferred */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* GSAP Helper Classes */
+.opacity-0 {
+  opacity: 0;
+}
+
+/* Hero AI text highlight */
+.ai-highlight {
+  position: relative;
+  display: inline-block;
+  padding: 0 0.04em;
+}
+
+.ai-highlight::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0.06em;
+  height: 0.16em;
+  width: 100%;
+  background: rgba(0, 102, 255, 0.22);
+  transform: scaleX(0);
+  transform-origin: left center;
+  opacity: 0.92;
+  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease;
+}
+
+.ai-highlight-draw::after {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+@keyframes cta-wave-blue {
+  0% {
+    background-position: -120% 50%;
+  }
+
+  100% {
+    background-position: 220% 50%;
+  }
+}
+
+.cta-primary-btn {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.cta-primary-btn>span {
+  position: relative;
+  z-index: 1;
+}
+
+.cta-primary-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background-image: linear-gradient(112deg,
+      rgba(34, 199, 232, 0.06) 0%,
+      rgba(34, 199, 232, 0.22) 38%,
+      rgba(204, 246, 255, 0.62) 50%,
+      rgba(34, 199, 232, 0.22) 62%,
+      rgba(34, 199, 232, 0.06) 100%);
+  background-size: 240% 100%;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 420ms ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cta-primary-btn-wave {
+  box-shadow: 0 0 0 1px rgba(34, 199, 232, 0.25), 0 0 22px rgba(34, 199, 232, 0.2);
+}
+
+.cta-primary-btn-wave::before {
+  opacity: 1;
+  animation: cta-wave-blue 1.55s linear infinite;
+}
+
+.cta-secondary-label {
+  transition: color 250ms ease;
+}
+
+.cta-wave-text {
+  background-image: linear-gradient(112deg,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(34, 199, 232, 0.9) 38%,
+      rgba(210, 248, 255, 1) 50%,
+      rgba(34, 199, 232, 0.9) 62%,
+      rgba(255, 255, 255, 0.9) 100%);
+  background-size: 240% 100%;
+  background-repeat: no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: cta-wave-blue 1.35s linear infinite;
+  text-shadow: 0 0 14px rgba(34, 199, 232, 0.28);
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes wave {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+.animate-wave {
+  animation: wave 0.5s ease-out forwards;
+}
+
+@keyframes nav-ripple {
+  0% {
+    transform: translateY(-50%) scaleX(1);
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: translateY(-50%) scaleX(28);
+    opacity: 0;
+  }
+}
+
+.animate-nav-ripple {
+  animation: nav-ripple 420ms ease-out forwards;
+}
+
+@keyframes nav-ripple-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(0.7);
+    opacity: 0.75;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(18);
+    opacity: 0;
+  }
+}
+
+.animate-nav-ripple-ring {
+  animation: nav-ripple-ring 480ms ease-out forwards;
+}
+
+/* Hide injected Google Translate UI chrome for cleaner presentation */
+.goog-te-banner-frame,
+.goog-te-balloon-frame,
+.goog-te-menu-frame,
+.goog-te-gadget,
+#goog-gt-tt,
+.skiptranslate,
+.VIpgJd-ZVi9od-l4eHX-hSRGPd,
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Custom transparent gradient border for buttons */
+.iridescent-border {
+  position: absolute;
+  inset: 0;
+  border-radius: 0.375rem;
+  padding: 1px;
+  background: linear-gradient(to right, #daafc3, #62bfd0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 250ms ease;
+}
+
+.group\/cta:hover .iridescent-border,
+.group\/cta:active .iridescent-border {
+  opacity: 1;
+}
+
+/* AI BOOT SEQUENCE ANIMATIONS */
+
+/* 1. Line Collision (Navbar) */
+@keyframes boot-line-left {
+  0% {
+    width: 0%;
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  45% {
+    width: 50%;
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    width: 50%;
+    opacity: 0;
+  }
+}
+
+@keyframes boot-line-right {
+  0% {
+    width: 0%;
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  45% {
+    width: 50%;
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    width: 50%;
+    opacity: 0;
+  }
+}
+
+@keyframes boot-line-flash {
+
+  0%,
+  45% {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scaleX(0.1);
+  }
+
+  65% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes boot-rope-reveal {
+
+  0%,
+  45% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-boot-left {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg, transparent, #6ad7eb);
+  box-shadow: 2px 0 12px 2px rgba(106, 215, 235, 0.6);
+  animation: boot-line-left 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  z-index: 20;
+}
+
+.animate-boot-right {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  background: linear-gradient(270deg, transparent, #e8a0c2);
+  box-shadow: -2px 0 12px 2px rgba(232, 160, 194, 0.6);
+  animation: boot-line-right 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  z-index: 20;
+}
+
+.animate-boot-flash {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  background: white;
+  box-shadow: 0 0 15px 4px rgba(255, 255, 255, 0.6);
+  animation: boot-line-flash 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  z-index: 21;
+}
+
+/* Delay rope appearance until the exact moment of collision */
+.animate-boot-rope {
+  animation: boot-rope-reveal 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* 2. Text Gradient Sweep (Hero) */
+@keyframes text-charge-sweep {
+  0% {
+    background-position: 0% 50%;
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    background-position: 0% 50%;
+    opacity: 0;
+  }
+}
+
+.animate-text-charge {
+  background-image: linear-gradient(90deg, #daafc3, #62bfd0, #daafc3);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0;
+  animation: text-charge-sweep 1.5s ease-in-out 0.8s forwards;
+}
+
+/* 3. Text Color Morphing After Sweep */
+@keyframes boot-text-reveal-base {
+
+  0%,
+  85% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes boot-text-hide-white {
+
+  0%,
+  85% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-boot-text-reveal {
+  opacity: 0;
+  animation: boot-text-reveal-base 2.2s ease-in-out forwards;
+}
+
+.animate-boot-text-hide {
+  opacity: 1;
+  animation: boot-text-hide-white 2.2s ease-in-out forwards;
+}
+
+/* 4. Background Image Reveal (Lady Justice) */
+@keyframes boot-image-haze {
+
+  0%,
+  40% {
+    background-color: rgba(2, 3, 0, 1);
+  }
+
+  100% {
+    background-color: rgba(2, 3, 0, 0);
+  }
+}
+
+.animate-boot-image-container::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  /* Expanded to cover child scale/overflow */
+  pointer-events: none;
+  z-index: 15;
+  background-color: rgba(2, 3, 0, 1);
+  animation: boot-image-haze 2.5s ease-out forwards;
+}
