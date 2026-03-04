@@ -357,17 +357,17 @@ export default function Navbar() {
         }}
       >
         <a href="/" className="group flex items-center">
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center">
             <Image
               src="/images/whiteLogo.png"
               alt="LexTutor"
               width={67}
               height={58}
               priority
-              className={`h-9 w-9 object-contain transition-transform group-hover:scale-[1.04] md:h-12 md:w-12 ${useLightTheme ? "invert" : ""}`}
+              className={`relative z-0 h-9 w-9 object-contain transition-transform group-hover:scale-[1.04] md:h-12 md:w-12 ${useLightTheme ? "invert" : ""}`}
             />
             <span
-              className={`text-lg font-bold tracking-[-0.03em] leading-none md:text-xl lg:text-3xl ${useLightTheme ? "text-[#0f172a]" : "text-white"}`}
+              className={`relative z-10 -ml-1.5 md:-ml-2.5 text-lg font-bold tracking-[-0.03em] leading-none md:text-xl lg:text-3xl ${useLightTheme ? "text-[#0f172a]" : "text-white"}`}
             >
               LexTutor
             </span>

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { CSSProperties } from "react";
+
 import { FeatureItem } from "./IDCard";
 
 export interface IDCardMobileProps {
@@ -65,7 +65,7 @@ export default function IDCardMobile({ current, activeIndex }: IDCardMobileProps
                         {/* Quote / Body Block */}
                         <div className="mb-6 relative z-30">
                             <p className="text-[14px] sm:text-[15px] text-white/95 font-medium leading-relaxed">
-                                "{current.desc}"
+                                &quot;{current.desc}&quot;
                             </p>
                         </div>
 

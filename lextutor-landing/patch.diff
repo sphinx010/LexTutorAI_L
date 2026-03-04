@@ -1,0 +1,42 @@
+﻿diff --git a/lextutor-landing/components/Features.tsx b/lextutor-landing/components/Features.tsx
+index 7f8819d..f53d3b2 100644
+--- a/lextutor-landing/components/Features.tsx
++++ b/lextutor-landing/components/Features.tsx
+@@ -5,7 +5,7 @@ import gsap from "gsap";
+ import { ScrollTrigger } from "gsap/ScrollTrigger";
+ import Image from "next/image";
+ import DottedArrow from "./DottedArrow";
+-import IDCard from "./IDCard";
++
+ import IDCardMobile from "./IDCardMobile";
+ 
+ gsap.registerPlugin(ScrollTrigger);
+@@ -234,7 +234,7 @@ export default function Features() {
+     }, [clearTimer, stopProgress]);
+ 
+     const current = features[activeIndex];
+-    const barcodeGlowStyle = { "--barcode-glow": current.barcodeGlow } as CSSProperties;
++
+     const stageLabel = `STAGE ${String(activeIndex + 1).padStart(2, "0")} / ${String(features.length).padStart(2, "0")}`;
+     return (
+         <section ref={sectionRef} id="features" className="built-structure-section w-full bg-[#020300] pt-12 pb-12 md:pt-32 md:pb-32">
+diff --git a/lextutor-landing/components/IDCardMobile.tsx b/lextutor-landing/components/IDCardMobile.tsx
+index 20bf423..ab4fc3f 100644
+--- a/lextutor-landing/components/IDCardMobile.tsx
++++ b/lextutor-landing/components/IDCardMobile.tsx
+@@ -1,5 +1,5 @@
+ import Image from "next/image";
+-import type { CSSProperties } from "react";
++
+ import { FeatureItem } from "./IDCard";
+ 
+ export interface IDCardMobileProps {
+@@ -65,7 +65,7 @@ export default function IDCardMobile({ current, activeIndex }: IDCardMobileProps
+                         {/* Quote / Body Block */}
+                         <div className="mb-6 relative z-30">
+                             <p className="text-[14px] sm:text-[15px] text-white/95 font-medium leading-relaxed">
+-                                "{current.desc}"
++                                &quot;{current.desc}&quot;
+                             </p>
+                         </div>
+ 

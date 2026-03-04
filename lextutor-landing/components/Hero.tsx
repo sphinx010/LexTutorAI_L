@@ -51,7 +51,7 @@ export default function Hero() {
         </div>
 
         <div className="hidden min-h-[100svh] items-center gap-10 px-10 pt-28 md:grid md:grid-cols-1 lg:grid-cols-[1fr_1.2fr] lg:gap-16 lg:px-16 lg:pt-40">
-          <div className="mx-auto flex w-full max-w-[720px] flex-col justify-center space-y-6 lg:mx-0 lg:space-y-8">
+          <div className="mx-auto flex w-full max-w-[720px] flex-col justify-center space-y-6 lg:mx-0 lg:space-y-8 md:mt-16 lg:mt-24">
             <div className="relative">
               <h1 className="text-6xl font-extrabold leading-[0.95] tracking-tight text-[#f2edf1] lg:text-7xl">
                 Master Legal Concepts with{" "}
@@ -91,15 +91,15 @@ export default function Hero() {
           </div>
 
           <div className="flex h-full w-full items-end justify-center lg:justify-end lg:pr-8">
-            <div className="animate-boot-image-container relative mx-auto w-full max-w-[32rem] lg:mx-0 lg:max-w-[1120px] lg:mr-[-11rem]">
-              <div className="pointer-events-none absolute inset-0 z-10 hidden bg-gradient-to-r from-[#020300] via-[#020300]/20 to-transparent lg:block" />
+            <div className="animate-boot-image-container relative mx-auto w-full max-w-[32rem] lg:mx-0 lg:max-w-[1280px] lg:mr-[-16rem]">
+              <div className="pointer-events-none absolute inset-0 z-10 hidden bg-gradient-to-r from-[#020300] via-[#020300]/5 to-transparent lg:block" />
               <Image
                 src="/images/hero.jpg"
                 alt="Futuristic Lady Justice statue representing AI-powered legal precision"
-                width={700}
-                height={900}
+                width={800}
+                height={1000}
                 priority
-                className="h-auto w-full max-h-[68vh] object-contain object-right-bottom lg:max-h-[98vh]"
+                className="h-auto w-full max-h-[68vh] object-contain object-right-bottom lg:max-h-[96vh]"
               />
             </div>
           </div>

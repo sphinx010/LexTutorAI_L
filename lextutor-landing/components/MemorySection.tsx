@@ -249,7 +249,7 @@ export default function MemorySection() {
                                 fill
                                 priority
                                 sizes="(min-width: 1024px) 46vw, 92vw"
-                                className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ease-in-out ${activeIndex === 0 ? "opacity-100" : "opacity-0"
+                                className={`absolute inset-0 h-full w-full object-contain object-center lg:object-right transition-opacity duration-700 ease-in-out ${activeIndex === 0 ? "opacity-100" : "opacity-0"
                                     }`}
                             />
                             <Image
@@ -258,7 +258,7 @@ export default function MemorySection() {
                                 fill
                                 priority
                                 sizes="(min-width: 1024px) 46vw, 92vw"
-                                className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ease-in-out ${activeIndex === 1 ? "opacity-100" : "opacity-0"
+                                className={`absolute inset-0 h-full w-full object-contain object-center lg:object-right transition-opacity duration-700 ease-in-out ${activeIndex === 1 ? "opacity-100" : "opacity-0"
                                     }`}
                             />
                         </div>

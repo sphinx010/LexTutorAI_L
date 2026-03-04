@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import DottedArrow from "./DottedArrow";
-import IDCard from "./IDCard";
+
 import IDCardMobile from "./IDCardMobile";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -234,7 +234,7 @@ export default function Features() {
     }, [clearTimer, stopProgress]);
 
     const current = features[activeIndex];
-    const barcodeGlowStyle = { "--barcode-glow": current.barcodeGlow } as CSSProperties;
+
     const stageLabel = `STAGE ${String(activeIndex + 1).padStart(2, "0")} / ${String(features.length).padStart(2, "0")}`;
     return (
         <section ref={sectionRef} id="features" className="built-structure-section w-full bg-[#020300] pt-12 pb-12 md:pt-32 md:pb-32">
@@ -330,7 +330,7 @@ export default function Features() {
                         </div>
                     </div>
 
-                    <div className="w-full lg:w-1/2 flex items-center justify-center">
+                    <div className="w-full lg:w-1/2 flex items-center justify-end lg:pr-8">
                         <div
                             ref={cardRef}
                             className="group relative flex h-80 w-full max-w-2xl overflow-hidden rounded-3xl border border-white/15 bg-black/80 shadow-[0_24px_70px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.16),inset_0_-1px_0_rgba(255,255,255,0.05),inset_0_0_0_1px_rgba(255,255,255,0.06)] backdrop-blur-2xl transition-transform duration-500 hover:-translate-y-1"
