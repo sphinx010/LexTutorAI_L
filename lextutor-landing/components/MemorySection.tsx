@@ -173,39 +173,41 @@ export default function MemorySection() {
     const state = STATES[activeIndex];
 
     return (
-        <section id="environment" ref={sectionRef} className="memory-section relative w-full overflow-hidden bg-[#9CCCEE]">
-            <div className="mx-auto w-full max-w-[1920px] px-6 md:px-10 lg:px-16">
-                <div className="flex min-h-[78vh] w-full flex-col lg:min-h-[78vh] lg:flex-row">
-                    <div ref={leftPanelRef} className="w-full pt-10 pb-6 lg:w-1/2 lg:py-16 flex flex-col justify-center">
+        <section id="vision" ref={sectionRef} className="memory-section relative w-full overflow-hidden bg-[#9CCCEE] h-[90vh]">
+            <div className="mx-auto h-full w-full max-w-[1920px] px-6 md:px-10 lg:px-16 flex flex-col justify-center">
+                <div className="flex w-full flex-col lg:flex-row items-center gap-8 lg:gap-16">
+                    <div ref={leftPanelRef} className="w-full lg:w-1/2 flex flex-col justify-center">
                         <div className="flex w-full max-w-[680px] flex-col" onClick={goNext}>
                             <p ref={taglineRef} className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-800 mb-4 cursor-pointer">
                                 {state.tagline}
                             </p>
-                            <h2 ref={headlineRef} className="text-5xl font-extrabold leading-[0.9] tracking-tight text-gray-900 md:text-7xl cursor-pointer">
+                            <h2 ref={headlineRef} className="text-4xl font-extrabold leading-[0.9] tracking-tight text-gray-900 md:text-5xl lg:text-6xl cursor-pointer">
                                 {state.headline}
                             </h2>
 
                             {/* Mobile Image Injection (Hidden on Desktop) */}
                             <div className="lg:hidden mt-6 mb-6 flex w-full items-center justify-center">
-                                <div className="relative h-[43vh] w-full max-w-[820px] overflow-hidden md:h-[50vh]">
-                                    <Image
-                                        src="/images/memory-stress.png"
-                                        alt="Lawyer under cognitive overload with stacked legal books"
-                                        fill
-                                        priority
-                                        sizes="(min-width: 1024px) 46vw, 92vw"
-                                        className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ease-in-out ${activeIndex === 0 ? "opacity-100" : "opacity-0"
-                                            }`}
-                                    />
-                                    <Image
-                                        src="/images/structure-mastery.png"
-                                        alt="Lawyer in calm structured workflow using laptop and phone"
-                                        fill
-                                        priority
-                                        sizes="(min-width: 1024px) 46vw, 92vw"
-                                        className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ease-in-out ${activeIndex === 1 ? "opacity-100" : "opacity-0"
-                                            }`}
-                                    />
+                                <div className="relative aspect-[16/9] md:aspect-[21/9] w-full max-w-[820px] overflow-hidden border border-black/10">
+                                    <div className="absolute inset-0 h-[200%] w-full">
+                                        <Image
+                                            src="/images/memory-stress.png"
+                                            alt="Lawyer under cognitive overload with stacked legal books"
+                                            fill
+                                            priority
+                                            sizes="(min-width: 1024px) 46vw, 92vw"
+                                            className={`object-cover object-top transition-opacity duration-700 ease-in-out ${activeIndex === 0 ? "opacity-100" : "opacity-0"
+                                                }`}
+                                        />
+                                        <Image
+                                            src="/images/structure-mastery.png"
+                                            alt="Lawyer in calm structured workflow using laptop and phone"
+                                            fill
+                                            priority
+                                            sizes="(min-width: 1024px) 46vw, 92vw"
+                                            className={`object-cover object-top transition-opacity duration-700 ease-in-out ${activeIndex === 1 ? "opacity-100" : "opacity-0"
+                                                }`}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
@@ -241,26 +243,28 @@ export default function MemorySection() {
                     </div>
 
                     {/* Desktop Image Injection (Hidden on Mobile) */}
-                    <div ref={videoPanelRef} className="hidden lg:flex w-full items-center justify-end lg:w-1/2 lg:pr-8">
-                        <div className="relative h-[64vh] w-full max-w-[820px] overflow-hidden">
-                            <Image
-                                src="/images/memory-stress.png"
-                                alt="Lawyer under cognitive overload with stacked legal books"
-                                fill
-                                priority
-                                sizes="(min-width: 1024px) 46vw, 92vw"
-                                className={`absolute inset-0 h-full w-full object-contain object-center lg:object-right transition-opacity duration-700 ease-in-out ${activeIndex === 0 ? "opacity-100" : "opacity-0"
-                                    }`}
-                            />
-                            <Image
-                                src="/images/structure-mastery.png"
-                                alt="Lawyer in calm structured workflow using laptop and phone"
-                                fill
-                                priority
-                                sizes="(min-width: 1024px) 46vw, 92vw"
-                                className={`absolute inset-0 h-full w-full object-contain object-center lg:object-right transition-opacity duration-700 ease-in-out ${activeIndex === 1 ? "opacity-100" : "opacity-0"
-                                    }`}
-                            />
+                    <div ref={videoPanelRef} className="w-full lg:w-1/2 flex items-center justify-end">
+                        <div className="relative aspect-[16/9] md:aspect-[16/9] xl:aspect-[16/10] w-full max-w-[600px] lg:max-w-none overflow-hidden border border-black/10 flex items-center justify-center">
+                            <div className="absolute inset-x-0 top-0 h-[200%] w-full">
+                                <Image
+                                    src="/images/memory-stress.png"
+                                    alt="Lawyer under cognitive overload with stacked legal books"
+                                    fill
+                                    priority
+                                    sizes="(min-width: 1024px) 46vw, 92vw"
+                                    className={`object-cover object-top transition-opacity duration-700 ease-in-out ${activeIndex === 0 ? "opacity-100" : "opacity-0"
+                                        }`}
+                                />
+                                <Image
+                                    src="/images/structure-mastery.png"
+                                    alt="Lawyer in calm structured workflow using laptop and phone"
+                                    fill
+                                    priority
+                                    sizes="(min-width: 1024px) 46vw, 92vw"
+                                    className={`object-cover object-top transition-opacity duration-700 ease-in-out ${activeIndex === 1 ? "opacity-100" : "opacity-0"
+                                        }`}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

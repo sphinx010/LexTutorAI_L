@@ -258,7 +258,7 @@ export default function ProgressionLoop() {
 
   return (
     <section
-      id="vision"
+      id="growth"
       ref={sectionRef}
       className={`${inter.variable} relative h-[90vh] w-full overflow-hidden`}
       style={{ backgroundColor: activeStage.surface }}
@@ -272,11 +272,11 @@ export default function ProgressionLoop() {
               {activeStage.tagline}
             </p>
 
-            <h2 ref={headlineRef} className="mt-4 font-[var(--font-inter)] text-[2.35rem] font-extrabold leading-[0.9] tracking-[-0.03em] text-[#111827] sm:text-[3.35rem] lg:text-[4.9rem]">
+            <h2 ref={headlineRef} className="mt-4 font-[var(--font-inter)] text-4xl font-extrabold leading-[0.9] tracking-[-0.03em] text-[#111827] sm:text-5xl lg:text-6xl xl:text-7xl">
               {activeStage.headline}
             </h2>
 
-            <p ref={bodyRef} className="mt-5 max-w-[50ch] text-base leading-relaxed text-[#374151] md:text-[1.03rem]">
+            <p ref={bodyRef} className="mt-5 max-w-[45ch] text-base leading-relaxed text-[#374151] md:text-lg">
               {activeStage.text}
             </p>
 
@@ -284,13 +284,13 @@ export default function ProgressionLoop() {
               {activeStage.stageLabel}
             </p>
 
-            <div className="mt-6 w-[280px] max-w-full">
+            <div className="mt-6 w-[360px] md:w-[400px] max-w-full">
               <div className="h-[1px] w-full bg-black/25">
                 <div ref={progressFillRef} className="h-[1px] bg-[#111827]" />
               </div>
             </div>
 
-            <div className="mt-5 flex items-center justify-between text-sm font-medium uppercase tracking-[0.2em] text-[#1F2937] [font-family:var(--font-inter)] w-[280px] max-w-full">
+            <div className="mt-5 flex items-center justify-between text-sm font-medium uppercase tracking-[0.2em] text-[#1F2937] [font-family:var(--font-inter)] w-[360px] md:w-[400px] max-w-full">
               <button
                 type="button"
                 onClick={prev}
@@ -315,14 +315,14 @@ export default function ProgressionLoop() {
           ref={imageWrapRef}
           className="mt-10 flex items-center justify-center lg:mt-0 lg:justify-end lg:pr-8"
         >
-          <div className="relative h-[39vh] w-full max-w-[760px] md:h-[45vh] lg:h-[56vh]">
+          <div className="relative aspect-[4/3] w-full max-w-[640px] lg:max-w-[760px] xl:max-w-[840px]">
             <Image
               key={activeStage.id}
               src={activeStage.imageSrc}
               alt={activeStage.headline}
               fill
               priority
-              sizes="(min-width: 1024px) 46vw, 92vw"
+              sizes="(min-width: 1024px) 50vw, 100vw"
               className="object-contain object-center lg:object-right"
             />
           </div>

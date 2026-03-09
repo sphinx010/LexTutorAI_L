@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 
-const DARK_SECTION_IDS = new Set(["hero", "features", "structure"]);
+const DARK_SECTION_IDS = new Set(["hero", "environment", "intelligence", "structure"]);
 
 export default function Navbar() {
   const [isVisible, setIsVisible] = useState(true);

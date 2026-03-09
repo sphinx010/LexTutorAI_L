@@ -113,7 +113,7 @@ export default function Features() {
         if (!progressFillRef.current || !progressPulseRef.current) return;
 
         gsap.set(progressFillRef.current, { width: "0%" });
-        gsap.set(progressPulseRef.current, { x: -18, opacity: 0.9 });
+        gsap.set(progressPulseRef.current, { left: "0%", x: -18, opacity: 0.9 });
 
         fillTweenRef.current = gsap.to(progressFillRef.current, {
             width: "100%",
@@ -122,7 +122,7 @@ export default function Features() {
         });
 
         pulseTweenRef.current = gsap.to(progressPulseRef.current, {
-            x: 128,
+            left: "100%",
             duration: AUTO_CYCLE_SECONDS,
             ease: "none",
         });
@@ -237,14 +237,15 @@ export default function Features() {
 
     const stageLabel = `STAGE ${String(activeIndex + 1).padStart(2, "0")} / ${String(features.length).padStart(2, "0")}`;
     return (
-        <section ref={sectionRef} id="features" className="built-structure-section w-full bg-[#020300] pt-12 pb-12 md:pt-32 md:pb-32">
-            <div className="mx-auto w-full max-w-[1920px] px-6 md:px-10 lg:px-16">
+        <section ref={sectionRef} id="environment" className="built-structure-section relative w-full bg-[#020300] h-[90vh]">
+            <div className="mx-auto h-full w-full max-w-[1920px] px-6 md:px-10 lg:px-16 flex flex-col justify-center">
 
                 {/* 
                   MOBILE LAYOUT (< lg) 
                   Hierarchy: Heading -> ID Card -> Short Desc -> Controls 
                 */}
                 <div className="flex flex-col items-center text-center lg:hidden">
+                    <p className="mb-3 text-[0.72rem] font-bold tracking-[0.24em] text-gray-500 uppercase">THE ENVIRONMENT</p>
                     <h2 className="mb-2 text-4xl font-extrabold tracking-tight leading-[1.05] text-white sm:text-5xl">
                         Built for Structure
                     </h2>
@@ -288,7 +289,8 @@ export default function Features() {
                   Preserved Original Structure 
                 */}
                 <div className="hidden lg:flex flex-row items-center gap-14">
-                    <div ref={leftRef} className="w-full pr-0 lg:w-1/2 lg:pr-12">
+                    <div ref={leftRef} className="w-full pr-0 lg:w-[42%] xl:w-[45%] lg:pr-12">
+                        <p className="mb-4 text-[0.72rem] font-bold tracking-[0.24em] text-gray-400 uppercase">THE ENVIRONMENT</p>
                         <h2 className="mb-6 text-5xl font-extrabold tracking-tight leading-[0.9] text-white xl:text-7xl">
                             Built for Structure
                         </h2>
@@ -301,16 +303,16 @@ export default function Features() {
                         <button
                             type="button"
                             onClick={goNext}
-                            className="mb-8 block w-32 text-left"
+                            className="mb-8 block w-[360px] md:w-[400px] max-w-full text-left"
                             aria-label="Skip to next structure card"
                         >
-                            <div className="relative h-px w-32 overflow-hidden bg-gray-800">
+                            <div className="relative h-px w-full overflow-hidden bg-gray-800">
                                 <div ref={progressFillRef} className="h-full w-0 bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
-                                <div ref={progressPulseRef} className="pointer-events-none absolute top-1/2 h-2 w-6 -translate-y-1/2 rounded-full bg-white/95 blur-sm shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
+                                <div ref={progressPulseRef} className="pointer-events-none absolute left-0 top-1/2 h-2 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/95 blur-sm shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
                             </div>
                         </button>
 
-                        <div className="flex items-center gap-8">
+                        <div className="flex items-center justify-between w-[360px] md:w-[400px] max-w-full">
                             <button
                                 type="button"
                                 onClick={goPrev}
@@ -330,10 +332,10 @@ export default function Features() {
                         </div>
                     </div>
 
-                    <div className="w-full lg:w-1/2 flex items-center justify-end lg:pr-8">
+                    <div className="w-full lg:w-[58%] xl:w-[55%] flex items-center justify-end lg:pr-8">
                         <div
                             ref={cardRef}
-                            className="group relative flex h-80 w-full max-w-2xl overflow-hidden rounded-3xl border border-white/15 bg-black/80 shadow-[0_24px_70px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.16),inset_0_-1px_0_rgba(255,255,255,0.05),inset_0_0_0_1px_rgba(255,255,255,0.06)] backdrop-blur-2xl transition-transform duration-500 hover:-translate-y-1"
+                            className="group relative flex h-[360px] w-full max-w-[640px] lg:h-[370px] xl:h-[380px] lg:max-w-[760px] xl:max-w-[800px] overflow-hidden rounded-3xl border border-white/15 bg-black/80 shadow-[0_24px_70px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.16),inset_0_-1px_0_rgba(255,255,255,0.05),inset_0_0_0_1px_rgba(255,255,255,0.06)] backdrop-blur-2xl transition-transform duration-500 hover:-translate-y-1"
                         >
                             <div className="pointer-events-none absolute inset-0 rounded-3xl bg-[linear-gradient(132deg,rgba(255,255,255,0.2)_0%,rgba(255,255,255,0.08)_16%,rgba(255,255,255,0.02)_30%,rgba(255,255,255,0)_52%,rgba(255,255,255,0.1)_100%)] opacity-45" />
                             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_22%,rgba(255,255,255,0.08),transparent_44%),radial-gradient(circle_at_85%_80%,rgba(255,255,255,0.05),transparent_38%)] opacity-60" />
@@ -344,14 +346,6 @@ export default function Features() {
                             <div className="pointer-events-none absolute -left-10 -top-10 h-28 w-36 rotate-[-18deg] bg-white/25 blur-2xl opacity-25" />
                             <div className="pointer-events-none absolute -right-12 bottom-[-52px] h-28 w-44 rotate-[12deg] bg-white/15 blur-2xl opacity-20" />
                             <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:from-transparent group-hover:via-white/5 group-hover:to-transparent group-hover:opacity-100" />
-                            <div className="pointer-events-none absolute inset-0 z-30">
-                                <p className="absolute left-1/2 top-3 -translate-x-1/2 text-[8px] font-mono uppercase tracking-[0.16em] text-white/30 drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)] transition-all duration-300 group-hover:text-[#FB923C] group-hover:drop-shadow-[0_0_10px_rgba(251,146,60,0.55)]">
-                                    LEX TUTOR CLEARANCE LEVEL 5
-                                </p>
-                                <p className="absolute bottom-3 right-4 text-[8px] font-mono uppercase tracking-[0.16em] text-white/30 drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)] transition-all duration-300 group-hover:text-[#FB923C] group-hover:drop-shadow-[0_0_10px_rgba(251,146,60,0.55)]">
-                                    AUTHORIZED PERSONNEL ONLY
-                                </p>
-                            </div>
 
                             <div className="relative flex h-full w-1/3 border-r border-white/10 bg-[#191919]">
                                 <div className="relative flex h-full w-full flex-col items-center justify-start px-5 pb-5 pt-7">
@@ -389,30 +383,38 @@ export default function Features() {
                                 </div>
                             </div>
 
-                            <div className="relative flex h-full flex-1 flex-col justify-center bg-[#111111] p-8">
+                            <div className="relative flex h-full flex-1 flex-col justify-center bg-[#111111] p-8 lg:p-10">
                                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.02)_22%,rgba(255,255,255,0)_52%,rgba(255,255,255,0.04)_100%)]" />
                                 <div className="pointer-events-none absolute left-0 top-0 h-px w-2/3 bg-gradient-to-r from-white/55 via-white/20 to-transparent" />
                                 <div className="pointer-events-none absolute inset-[1px] rounded-r-[1.45rem] border border-white/10" />
                                 <div className="pointer-events-none absolute -top-10 right-10 h-24 w-36 rotate-[14deg] bg-white/15 blur-2xl opacity-20" />
-                                <p className="mb-1 text-[10px] font-mono uppercase tracking-widest text-gray-500">
+
+                                <p className="absolute left-8 lg:left-10 top-6 text-[8px] font-mono uppercase tracking-[0.16em] text-black/80 [text-shadow:0_1px_1px_rgba(255,255,255,0.15)] group-hover:text-[#FB923C] group-hover:[text-shadow:0_0_10px_rgba(251,146,60,0.5)] transition-all duration-300">
+                                    LEX TUTOR CLEARANCE LEVEL 5
+                                </p>
+                                <p className="absolute right-8 lg:right-10 bottom-6 text-[8px] font-mono uppercase tracking-[0.16em] text-black/80 [text-shadow:0_1px_1px_rgba(255,255,255,0.15)] group-hover:text-[#FB923C] group-hover:[text-shadow:0_0_10px_rgba(251,146,60,0.5)] transition-all duration-300">
+                                    AUTHORIZED PERSONNEL ONLY
+                                </p>
+
+                                <p className="mt-4 mb-1 text-[10px] font-mono uppercase tracking-widest text-gray-500">
                                     FEATURE
                                 </p>
-                                <h3 className="mb-2 text-3xl font-bold tracking-tight text-[#F2C94C] [text-shadow:0_1px_0_rgba(255,255,255,0.1)] drop-shadow-[0_0_8px_rgba(242,201,76,0.35)]">
+                                <h3 className="mb-2 text-2xl lg:text-3xl font-bold tracking-tight text-[#F2C94C] [text-shadow:0_1px_0_rgba(255,255,255,0.1)] drop-shadow-[0_0_8px_rgba(242,201,76,0.35)]">
                                     {current.title}
                                 </h3>
                                 <hr className="my-3 border-white/10" />
-                                <p className="mb-6 text-base font-medium leading-relaxed text-white/95">
+                                <p className="mb-5 text-sm lg:text-base font-medium leading-relaxed text-white/95">
                                     {current.desc}
                                 </p>
 
                                 <hr className="mb-4 border-white/10" />
-                                <p className="mb-1 text-[11px] font-mono uppercase tracking-widest text-[#66D9EF]">
+                                <p className="mb-1 text-[10px] lg:text-[11px] font-mono uppercase tracking-widest text-[#66D9EF]">
                                     LEGAL REFERENCE
                                 </p>
-                                <p className="text-sm font-mono uppercase tracking-wide text-[#7CFF9E] drop-shadow-[0_0_8px_rgba(124,255,158,0.3)]">
+                                <p className="text-xs lg:text-sm font-mono uppercase tracking-wide text-[#7CFF9E] drop-shadow-[0_0_8px_rgba(124,255,158,0.3)]">
                                     {current.refLabel}
                                 </p>
-                                <p className="mt-1 text-sm font-mono text-[#7CFF9E]">
+                                <p className="mt-1 text-xs lg:text-sm font-mono text-[#7CFF9E]">
                                     {current.refDesc}
                                 </p>
 

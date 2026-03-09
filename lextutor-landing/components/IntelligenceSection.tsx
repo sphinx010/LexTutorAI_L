@@ -89,42 +89,40 @@ export default function IntelligenceSection() {
 
     return (
         <section
-            id="about"
+            id="intelligence"
             ref={containerRef}
-            className="intelligence-section relative overflow-hidden bg-[#EEEEEE] py-10 md:py-12 lg:h-[77vh] lg:max-h-[640px] lg:overflow-visible lg:py-12"
+            className="intelligence-section relative overflow-hidden bg-[#EEEEEE] h-[90vh]"
         >
-            <div className="intelligence-brain-shell pointer-events-none absolute inset-y-0 right-0 hidden w-[66%] overflow-hidden lg:block">
-                <div className="intelligence-brain-float absolute inset-0">
+            <div className="intelligence-brain-shell pointer-events-none absolute inset-y-0 right-0 hidden w-[66%] lg:w-[58%] xl:w-[50%] overflow-hidden lg:flex items-center justify-end pr-10">
+                <div className="intelligence-brain-float relative w-full h-[88%] mix-blend-darken [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_75%)]">
                     <Image
                         src="/images/cognitive.png"
                         alt="Cognitive intelligence brain visualization"
                         fill
                         priority={true}
                         quality={100}
-                        sizes="66vw"
-                        className="intelligence-brain-image object-cover object-[85%_52%] opacity-100"
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                        className="intelligence-brain-image object-contain object-right opacity-90"
                     />
                 </div>
-                <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_64px_26px_#EEEEEE]" />
-                <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-[#eeeeee] to-transparent" />
             </div>
 
-            <div className="relative z-10 mx-auto w-full max-w-[1920px] px-6 md:px-10 lg:px-16">
-                <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-6">
-                    <div className="flex items-center lg:min-h-[430px]">
-                        <div className="w-full max-w-2xl">
-                            <p className="intelligence-tagline mb-2 font-sans text-xs font-semibold uppercase tracking-[0.2em] text-cyan-600">
+            <div className="relative z-10 mx-auto h-full w-full max-w-[1920px] px-6 md:px-10 lg:px-16 flex flex-col justify-center">
+                <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
+                    <div className="flex flex-col justify-center h-full">
+                        <div className="w-full max-w-2xl text-left">
+                            <p className="intelligence-tagline mb-3 text-[0.72rem] font-bold tracking-[0.24em] text-gray-500 uppercase">
                                 THE INTELLIGENCE LAYER
                             </p>
 
-                            <h2 className="font-sans text-4xl font-black leading-[0.82] tracking-[-0.03em] text-slate-900 md:text-[3.1rem] lg:text-[3.35rem]">
+                            <h2 className="font-sans mb-2 text-3xl font-black leading-[1.05] tracking-[-0.03em] text-slate-900 md:text-4xl lg:text-[2.8rem] xl:text-[3.2rem]">
                                 <span className="intelligence-headline-line block">Powered by</span>
-                                <span className="intelligence-headline-line block text-[#57B7E9]">Agentic</span>
-                                <span className="intelligence-headline-line block">Legal</span>
-                                <span className="intelligence-headline-line block">Intelligence</span>
+                                <span className="intelligence-headline-line block text-[#57B7E9] mt-1">Agentic</span>
+                                <span className="intelligence-headline-line block mt-1">Legal</span>
+                                <span className="intelligence-headline-line block mt-1">Intelligence</span>
                             </h2>
 
-                            <p className="intelligence-subtext mb-6 mt-4 max-w-xl font-sans text-[0.98rem] leading-relaxed text-gray-700 md:text-base">
+                            <p className="intelligence-subtext mb-6 mt-4 max-w-xl font-sans text-[0.95rem] leading-relaxed text-gray-700 md:text-base">
                                 Our architecture does not just process text. It maps legal relationships and surfaces logical inconsistencies in real time.
                             </p>
 
@@ -151,9 +149,8 @@ export default function IntelligenceSection() {
                         priority={true}
                         quality={100}
                         sizes="100vw"
-                        className="object-cover object-center opacity-100"
+                        className="object-cover object-center mix-blend-darken [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_75%)] opacity-90"
                     />
-                    <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_44px_16px_#EEEEEE]" />
                 </div>
             </div>
         </section>
