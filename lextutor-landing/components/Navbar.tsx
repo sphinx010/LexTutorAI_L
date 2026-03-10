@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 
-const DARK_SECTION_IDS = new Set(["hero", "environment", "intelligence", "structure"]);
+const LIGHT_SECTION_IDS = new Set(["intelligence", "progress", "growth", "vision"]);
+const DARK_SECTION_IDS = new Set(["hero", "environment", "structure", "cta", "footer"]);
 
 export default function Navbar() {
   const [isVisible, setIsVisible] = useState(true);
@@ -163,22 +164,21 @@ export default function Navbar() {
 
   useEffect(() => {
     let rafId: number | null = null;
-    const sections = Array.from(document.querySelectorAll<HTMLElement>("section[id]"));
+    const sections = Array.from(document.querySelectorAll<HTMLElement>("section[id], footer[id]"));
     if (sections.length === 0) return;
 
-    const getLuminance = (section: HTMLElement) => {
+    const isSectionDark = (section: HTMLElement) => {
+      if (LIGHT_SECTION_IDS.has(section.id)) return false;
+      if (DARK_SECTION_IDS.has(section.id)) return true;
+
       const color = window.getComputedStyle(section).backgroundColor;
       const channels = color.match(/\d+(\.\d+)?/g);
-      if (!channels || channels.length < 3) return 255;
+      if (!channels || channels.length < 3) return true;
       const r = Number(channels[0]);
       const g = Number(channels[1]);
       const b = Number(channels[2]);
-      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    };
-
-    const isSectionDark = (section: HTMLElement) => {
-      if (DARK_SECTION_IDS.has(section.id)) return true;
-      return getLuminance(section) < 130;
+      const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      return luminance < 130;
     };
 
     const getSectionBounds = () => {
@@ -196,12 +196,14 @@ export default function Navbar() {
       const sectionBounds = getSectionBounds();
       if (sectionBounds.length === 0) return;
       const navHeight = navRowRef.current?.getBoundingClientRect().height ?? 64;
-      const probeDocY = window.scrollY + navHeight + 6;
 
-      // Hard guard: as long as the nav probe is within hero bounds, force dark mode
-      // to preserve contrast on the black hero background.
+      // Expand the probe area if we are at the very bottom of the page
+      // so it successfully detects the footer which might not push high enough.
+      const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 10;
+      const probeDocY = isAtBottom ? document.documentElement.scrollHeight - 10 : window.scrollY + navHeight + 6;
+
       const hero = document.getElementById("hero");
-      if (hero) {
+      if (hero && !isAtBottom) {
         const heroTop = hero.offsetTop;
         const heroBottom = heroTop + Math.max(hero.offsetHeight, 1);
         if (probeDocY < heroBottom - 2) {

@@ -126,7 +126,7 @@ export default function CTA() {
     }, []);
 
     return (
-        <section ref={containerRef} className="cta-section relative py-20 md:py-32 overflow-hidden flex items-center justify-center min-h-[52vh] md:min-h-[60vh] bg-foreground text-background">
+        <section id="cta" ref={containerRef} className="cta-section relative py-20 md:py-32 overflow-hidden flex items-center justify-center min-h-[52vh] md:min-h-[60vh] bg-foreground text-background">
 
             {/* Animated Gradient Background */}
             <div className="absolute inset-0 overflow-hidden">
