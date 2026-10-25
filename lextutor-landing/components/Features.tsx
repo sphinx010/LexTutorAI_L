@@ -1,428 +1,741 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Image from "next/image";
-import DottedArrow from "./DottedArrow";
-
-import IDCardMobile from "./IDCardMobile";
+import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const AUTO_CYCLE_SECONDS = 9;
-
-type FeatureItem = {
-    title: string;
-    desc: string;
-    refLabel: string;
-    refDesc: string;
-    serial: string;
-    icon: string;
-    barcodeGlow: string;
-};
-
-const features: FeatureItem[] = [
-    {
-        title: "Cognitive Mapping",
-        desc: "Get diagnostic analysis of personal reasoning patterns, infuse learning with psychology.",
-        refLabel: "REF: SEC. 28 / CRIMINAL CODE",
-        refDesc: "(Defence of Insanity)",
-        serial: "LX-COG-9921-KL",
-        icon: "/icons/cognitive-mapping.png",
-        barcodeGlow: "rgba(86,182,194,0.5)",
-    },
-    {
-        title: "Precedent Analysis",
-        desc: "Trace case law evolution with temporal graphs.",
-        refLabel: "REF: SEC. 167 / EVIDENCE ACT",
-        refDesc: "(Presumptions of facts/Judicial notice)",
-        serial: "LX-PREC-0082-3164",
-        icon: "/icons/precedent-analysis.png",
-        barcodeGlow: "rgba(124,255,158,0.5)",
-    },
-    {
-        title: "Balanced Reasoning",
-        desc: "Study with smart intellisense, instantly lints submissions for missing authorities.",
-        refLabel: "REF: RULE 1 / RPC 2023",
-        refDesc: "(General Responsibilites of a Lawyer)",
-        serial: "LX-BAL-7731-MN",
-        icon: "/icons/balanced-reasoning.png",
-        barcodeGlow: "rgba(242,201,76,0.5)",
-    },
-    {
-        title: "Bar Ready",
-        desc: "Secure your expectations with AI-driven performance tracking.",
-        refLabel: "REF: SEC. 84 / EVIDENCE ACT",
-        refDesc: "(Admissibility of computer-generated evidence)",
-        serial: "LX-BAR-4452-PQ",
-        icon: "/icons/bar-ready.png",
-        barcodeGlow: "rgba(255,47,146,0.5)",
-    },
-    {
-        title: "Instant Synthesis",
-        desc: "Convert hours of reading into minutes of insight.",
-        refLabel: "REF: SEC. 126 / EVIDENCE ACT",
-        refDesc: "(Oral evidence must be direct)",
-        serial: "LX-SYN-1183-RS",
-        icon: "/icons/instant-synthesis.png?v=20260221103432",
-        barcodeGlow: "rgba(86,182,194,0.5)",
-    },
-    {
-        title: "Socratic Study",
-        desc: "AI-driven dialogue that challenges foundational legal reasoning.",
-        refLabel: "REF: SEC. 36 / 1999 CONSTITUTION",
-        refDesc: "(Right to fair hearing)",
-        serial: "LX-SOC-6694-TU",
-        icon: "/icons/socratic-study.png?v=20260221101531",
-        barcodeGlow: "rgba(124,255,158,0.5)",
-    },
-];
+type WorkspaceTab = "draft" | "practice" | "charge" | "lexa";
 
 export default function Features() {
-    const sectionRef = useRef<HTMLElement | null>(null);
-    const leftRef = useRef<HTMLDivElement | null>(null);
-    const cardRef = useRef<HTMLDivElement | null>(null);
-    const progressFillRef = useRef<HTMLDivElement | null>(null);
-    const progressPulseRef = useRef<HTMLDivElement | null>(null);
+  const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceTab>("draft");
+  const [markupView, setMarkupView] = useState<"corrected" | "original">(
+    "corrected"
+  );
+  const [showChanges, setShowChanges] = useState(true);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
-    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const fillTweenRef = useRef<gsap.core.Tween | null>(null);
-    const pulseTweenRef = useRef<gsap.core.Tween | null>(null);
-    const isTransitioningRef = useRef(false);
-    const activeIndexRef = useRef(0);
+  useGSAP(
+    () => {
+      if (!panelRef.current) return;
 
-    const [activeIndex, setActiveIndex] = useState(0);
-    activeIndexRef.current = activeIndex;
+      const copyBlock = panelRef.current.querySelector(".lt-leader-copy");
+      const canvasBlock = panelRef.current.querySelector(
+        ".lt-leader-canvas, .lt-picture-panel"
+      );
+      const staggeredItems = panelRef.current.querySelectorAll(
+        ".ws-animate-item"
+      );
 
-    const clearTimer = useCallback(() => {
-        if (timerRef.current) {
-            clearTimeout(timerRef.current);
-            timerRef.current = null;
+      gsap.fromTo(
+        [copyBlock, canvasBlock].filter(Boolean),
+        { opacity: 0, y: 12 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.48,
+          stagger: 0.08,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: panelRef.current,
+            start: "top 84%",
+            toggleActions: "play none none none",
+          },
         }
-    }, []);
+      );
 
-    const stopProgress = useCallback(() => {
-        fillTweenRef.current?.kill();
-        pulseTweenRef.current?.kill();
-        fillTweenRef.current = null;
-        pulseTweenRef.current = null;
-    }, []);
-
-    const startProgress = useCallback(() => {
-        if (!progressFillRef.current || !progressPulseRef.current) return;
-
-        gsap.set(progressFillRef.current, { width: "0%" });
-        gsap.set(progressPulseRef.current, { left: "0%", x: -18, opacity: 0.9 });
-
-        fillTweenRef.current = gsap.to(progressFillRef.current, {
-            width: "100%",
-            duration: AUTO_CYCLE_SECONDS,
-            ease: "none",
-        });
-
-        pulseTweenRef.current = gsap.to(progressPulseRef.current, {
-            left: "100%",
-            duration: AUTO_CYCLE_SECONDS,
-            ease: "none",
-        });
-    }, []);
-
-    const goToIndex = useCallback(
-        (nextIndex: number) => {
-            if (isTransitioningRef.current) return;
-
-            const normalized = (nextIndex + features.length) % features.length;
-            if (normalized === activeIndexRef.current) return;
-
-            clearTimer();
-            stopProgress();
-            isTransitioningRef.current = true;
-
-            if (!cardRef.current) {
-                setActiveIndex(normalized);
-                isTransitioningRef.current = false;
-                return;
-            }
-
-            gsap.to(cardRef.current, {
-                autoAlpha: 0,
-                scale: 0.985,
-                y: 10,
-                duration: 0.3,
-                ease: "power2.inOut",
-                onComplete: () => {
-                    setActiveIndex(normalized);
-                    isTransitioningRef.current = false;
-                },
-            });
-        },
-        [clearTimer, stopProgress]
-    );
-
-    const goPrev = useCallback(() => goToIndex(activeIndexRef.current - 1), [goToIndex]);
-    const goNext = useCallback(() => goToIndex(activeIndexRef.current + 1), [goToIndex]);
-
-    const scheduleAutoCycle = useCallback(() => {
-        clearTimer();
-        timerRef.current = setTimeout(() => {
-            goToIndex(activeIndexRef.current + 1);
-        }, AUTO_CYCLE_SECONDS * 1000);
-    }, [clearTimer, goToIndex]);
-
-    useLayoutEffect(() => {
-        const ctx = gsap.context(() => {
-            if (leftRef.current) {
-                gsap.fromTo(
-                    leftRef.current,
-                    { y: 28, opacity: 0 },
-                    {
-                        y: 0,
-                        opacity: 1,
-                        duration: 0.9,
-                        ease: "power2.out",
-                        scrollTrigger: {
-                            trigger: ".built-structure-section",
-                            start: "top 82%",
-                            once: true,
-                        },
-                    }
-                );
-            }
-
-            if (cardRef.current) {
-                gsap.fromTo(
-                    cardRef.current,
-                    { y: 28, opacity: 0, scale: 0.985 },
-                    {
-                        y: 0,
-                        opacity: 1,
-                        scale: 1,
-                        duration: 1,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: ".built-structure-section",
-                            start: "top 76%",
-                            once: true,
-                        },
-                    }
-                );
-            }
-        }, sectionRef);
-
-        return () => ctx.revert();
-    }, []);
-
-    useLayoutEffect(() => {
-        if (!cardRef.current) return;
-
+      if (staggeredItems.length > 0) {
         gsap.fromTo(
-            cardRef.current,
-            { autoAlpha: 0, scale: 0.985, y: 10 },
-            { autoAlpha: 1, scale: 1, y: 0, duration: 0.42, ease: "power2.out" }
+          staggeredItems,
+          { opacity: 0, y: 8 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.42,
+            stagger: 0.045,
+            delay: 0.1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: panelRef.current,
+              start: "top 84%",
+              toggleActions: "play none none none",
+            },
+          }
         );
+      }
+    },
+    { scope: sectionRef, dependencies: [activeWorkspace] }
+  );
 
-        startProgress();
-        scheduleAutoCycle();
-    }, [activeIndex, scheduleAutoCycle, startProgress]);
-
-    useEffect(() => {
-        return () => {
-            clearTimer();
-            stopProgress();
-        };
-    }, [clearTimer, stopProgress]);
-
-    const current = features[activeIndex];
-
-    const stageLabel = `STAGE ${String(activeIndex + 1).padStart(2, "0")} / ${String(features.length).padStart(2, "0")}`;
-    return (
-        <section ref={sectionRef} id="environment" className="built-structure-section relative w-full bg-[#020300] h-[90vh]">
-            <div className="mx-auto h-full w-full max-w-[1920px] px-6 md:px-10 lg:px-16 flex flex-col justify-center">
-
-                {/* 
-                  MOBILE LAYOUT (< lg) 
-                  Hierarchy: Heading -> ID Card -> Short Desc -> Controls 
-                */}
-                <div className="flex flex-col items-center text-center lg:hidden">
-                    <p className="mb-3 text-[0.72rem] font-bold tracking-[0.24em] text-gray-500 uppercase">THE ENVIRONMENT</p>
-                    <h2 className="mb-2 text-4xl font-extrabold tracking-tight leading-[1.05] text-white sm:text-5xl">
-                        Built for Structure
-                    </h2>
-                    <p className="mb-6 max-w-sm text-sm leading-relaxed text-gray-400">
-                        Move beyond memorization. LexTutor architects your legal understanding.
-                    </p>
-
-                    {/* Scaled ID Card Stack Vertical Mobile Edition */}
-                    <div className="flex w-full justify-center px-4 mb-4 xl:hidden">
-                        <div className="w-full max-w-[340px] h-[550px] sm:h-[650px]">
-                            <IDCardMobile current={current} activeIndex={activeIndex} />
-                        </div>
-                    </div>
-
-                    <p className="mb-4 font-mono text-[10px] tracking-widest text-gray-500">
-                        {stageLabel}
-                    </p>
-
-                    <div className="flex w-full max-w-[240px] items-center justify-between">
-                        <button
-                            type="button"
-                            onClick={goPrev}
-                            className="group flex cursor-pointer items-center gap-2 text-xs font-medium text-white transition-all hover:-translate-x-0.5"
-                        >
-                            <DottedArrow direction="left" gradient className="h-5 w-5 opacity-70 drop-shadow-[0_0_8px_rgba(98,191,208,0.5)] transition-all group-hover:opacity-100 group-hover:drop-shadow-[0_0_12px_rgba(98,191,208,0.8)]" />
-                            Prev
-                        </button>
-                        <button
-                            type="button"
-                            onClick={goNext}
-                            className="group flex cursor-pointer items-center gap-2 text-xs font-medium text-white transition-all hover:translate-x-0.5"
-                        >
-                            Next
-                            <DottedArrow direction="right" gradient className="h-5 w-5 opacity-70 drop-shadow-[0_0_8px_rgba(98,191,208,0.5)] transition-all group-hover:opacity-100 group-hover:drop-shadow-[0_0_12px_rgba(98,191,208,0.8)]" />
-                        </button>
-                    </div>
-                </div>
-
-                {/* 
-                  DESKTOP LAYOUT (>= lg) 
-                  Preserved Original Structure 
-                */}
-                <div className="hidden lg:flex flex-row items-center gap-14">
-                    <div ref={leftRef} className="w-full pr-0 lg:w-[42%] xl:w-[45%] lg:pr-12">
-                        <p className="mb-4 text-[0.72rem] font-bold tracking-[0.24em] text-gray-400 uppercase">THE ENVIRONMENT</p>
-                        <h2 className="mb-6 text-5xl font-extrabold tracking-tight leading-[0.9] text-white xl:text-7xl">
-                            Built for Structure
-                        </h2>
-                        <p className="mb-12 max-w-xl text-lg leading-relaxed text-gray-400">
-                            Move beyond memorization. LexTutor architects your legal understanding.
-                        </p>
-
-                        <p className="mb-4 font-mono text-xs tracking-widest text-gray-500">{stageLabel}</p>
-
-                        <button
-                            type="button"
-                            onClick={goNext}
-                            className="mb-8 block w-[360px] md:w-[400px] max-w-full text-left"
-                            aria-label="Skip to next structure card"
-                        >
-                            <div className="relative h-px w-full overflow-hidden bg-gray-800">
-                                <div ref={progressFillRef} className="h-full w-0 bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
-                                <div ref={progressPulseRef} className="pointer-events-none absolute left-0 top-1/2 h-2 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/95 blur-sm shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
-                            </div>
-                        </button>
-
-                        <div className="flex items-center justify-between w-[360px] md:w-[400px] max-w-full">
-                            <button
-                                type="button"
-                                onClick={goPrev}
-                                className="group flex cursor-pointer items-center gap-2 text-sm font-medium text-white transition-all hover:-translate-x-0.5"
-                            >
-                                <DottedArrow direction="left" gradient className="h-6 w-6 opacity-70 drop-shadow-[0_0_8px_rgba(98,191,208,0.5)] transition-all group-hover:opacity-100 group-hover:drop-shadow-[0_0_12px_rgba(98,191,208,0.8)] md:h-8 md:w-8" />
-                                Prev
-                            </button>
-                            <button
-                                type="button"
-                                onClick={goNext}
-                                className="group flex cursor-pointer items-center gap-2 text-sm font-medium text-white transition-all hover:translate-x-0.5"
-                            >
-                                Next
-                                <DottedArrow direction="right" gradient className="h-6 w-6 opacity-70 drop-shadow-[0_0_8px_rgba(98,191,208,0.5)] transition-all group-hover:opacity-100 group-hover:drop-shadow-[0_0_12px_rgba(98,191,208,0.8)] md:h-8 md:w-8" />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="w-full lg:w-[58%] xl:w-[55%] flex items-center justify-end lg:pr-8">
-                        <div
-                            ref={cardRef}
-                            className="group relative flex h-[360px] w-full max-w-[640px] lg:h-[370px] xl:h-[380px] lg:max-w-[760px] xl:max-w-[800px] overflow-hidden rounded-3xl border border-white/15 bg-black/80 shadow-[0_24px_70px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.16),inset_0_-1px_0_rgba(255,255,255,0.05),inset_0_0_0_1px_rgba(255,255,255,0.06)] backdrop-blur-2xl transition-transform duration-500 hover:-translate-y-1"
-                        >
-                            <div className="pointer-events-none absolute inset-0 rounded-3xl bg-[linear-gradient(132deg,rgba(255,255,255,0.2)_0%,rgba(255,255,255,0.08)_16%,rgba(255,255,255,0.02)_30%,rgba(255,255,255,0)_52%,rgba(255,255,255,0.1)_100%)] opacity-45" />
-                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_22%,rgba(255,255,255,0.08),transparent_44%),radial-gradient(circle_at_85%_80%,rgba(255,255,255,0.05),transparent_38%)] opacity-60" />
-                            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(0deg,transparent_0%,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:12px_12px] opacity-[0.12]" />
-                            <div className="pointer-events-none absolute inset-[1px] rounded-[1.45rem] border border-white/10" />
-                            <div className="pointer-events-none absolute left-8 top-0 h-px w-1/3 bg-gradient-to-r from-white/75 via-white/45 to-transparent opacity-80" />
-                            <div className="pointer-events-none absolute right-0 top-10 h-1/3 w-px bg-gradient-to-b from-white/55 via-white/20 to-transparent" />
-                            <div className="pointer-events-none absolute -left-10 -top-10 h-28 w-36 rotate-[-18deg] bg-white/25 blur-2xl opacity-25" />
-                            <div className="pointer-events-none absolute -right-12 bottom-[-52px] h-28 w-44 rotate-[12deg] bg-white/15 blur-2xl opacity-20" />
-                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:from-transparent group-hover:via-white/5 group-hover:to-transparent group-hover:opacity-100" />
-
-                            <div className="relative flex h-full w-1/3 border-r border-white/10 bg-[#191919]">
-                                <div className="relative flex h-full w-full flex-col items-center justify-start px-5 pb-5 pt-7">
-                                    <div className="absolute inset-4 rounded-2xl border border-white/10" />
-                                    <div className="pointer-events-none absolute inset-[22px] rounded-xl border border-dashed border-white/10" />
-                                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(255,255,255,0.08),transparent_54%)]" />
-
-                                    <div className="relative z-10 mt-1 h-[154px] w-[154px] overflow-hidden rounded-[1.2rem] border border-white/10 bg-black/42 p-2.5 shadow-[0_12px_24px_rgba(0,0,0,0.42)]">
-                                        <Image
-                                            src={current.icon}
-                                            alt={current.title}
-                                            width={420}
-                                            height={420}
-                                            priority={activeIndex === 0}
-                                            className="relative z-10 h-full w-full rounded-[0.95rem] object-contain [mask-image:radial-gradient(ellipse_80%_80%_at_50%_46%,black_58%,transparent_100%)]"
-                                        />
-                                        <div className="pointer-events-none absolute inset-0 z-20 rounded-[1.2rem] bg-[radial-gradient(circle_at_95%_95%,rgba(0,0,0,0.95)_0%,rgba(0,0,0,0.8)_12%,transparent_30%)]" />
-                                        <div className="pointer-events-none absolute inset-0 rounded-[1.2rem] shadow-[inset_0_0_24px_10px_rgba(13,13,13,0.9)]" />
-                                        <div className="pointer-events-none absolute inset-0 rounded-[1.2rem] ring-1 ring-white/10" />
-                                    </div>
-
-                                    <div className="z-10 mt-3 max-w-[160px]">
-                                        <p className="text-[8px] font-mono uppercase tracking-[0.16em] text-gray-400">User ID</p>
-                                        <p className="mt-0.5 text-[10px] font-mono leading-tight tracking-[0.08em] text-[#FF2F92]">{current.serial}</p>
-                                    </div>
-
-                                    <div className="z-10 mt-auto mb-1 w-[160px] border-t border-white/10 pt-4 transition-colors group-hover:border-white/20">
-                                        <p className="mb-1 text-[8px] font-mono uppercase tracking-widest text-gray-500">
-                                            SCAN CODE
-                                        </p>
-                                        <div className="relative h-6 w-full" style={{ "--barcode-glow": current.barcodeGlow } as React.CSSProperties}>
-                                            <div className="h-full w-full bg-[repeating-linear-gradient(90deg,#fff_0px,#fff_1px,transparent_1px,transparent_3px)] opacity-60 transition-all duration-300 group-hover:opacity-100 group-hover:[box-shadow:0_0_10px_var(--barcode-glow)]" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="relative flex h-full flex-1 flex-col justify-center bg-[#111111] p-8 lg:p-10">
-                                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.02)_22%,rgba(255,255,255,0)_52%,rgba(255,255,255,0.04)_100%)]" />
-                                <div className="pointer-events-none absolute left-0 top-0 h-px w-2/3 bg-gradient-to-r from-white/55 via-white/20 to-transparent" />
-                                <div className="pointer-events-none absolute inset-[1px] rounded-r-[1.45rem] border border-white/10" />
-                                <div className="pointer-events-none absolute -top-10 right-10 h-24 w-36 rotate-[14deg] bg-white/15 blur-2xl opacity-20" />
-
-                                <p className="absolute left-8 lg:left-10 top-6 text-[8px] font-mono uppercase tracking-[0.16em] text-black/80 [text-shadow:0_1px_1px_rgba(255,255,255,0.15)] group-hover:text-[#FB923C] group-hover:[text-shadow:0_0_10px_rgba(251,146,60,0.5)] transition-all duration-300">
-                                    LEX TUTOR CLEARANCE LEVEL 5
-                                </p>
-                                <p className="absolute right-8 lg:right-10 bottom-6 text-[8px] font-mono uppercase tracking-[0.16em] text-black/80 [text-shadow:0_1px_1px_rgba(255,255,255,0.15)] group-hover:text-[#FB923C] group-hover:[text-shadow:0_0_10px_rgba(251,146,60,0.5)] transition-all duration-300">
-                                    AUTHORIZED PERSONNEL ONLY
-                                </p>
-
-                                <p className="mt-4 mb-1 text-[10px] font-mono uppercase tracking-widest text-gray-500">
-                                    FEATURE
-                                </p>
-                                <h3 className="mb-2 text-2xl lg:text-3xl font-bold tracking-tight text-[#F2C94C] [text-shadow:0_1px_0_rgba(255,255,255,0.1)] drop-shadow-[0_0_8px_rgba(242,201,76,0.35)]">
-                                    {current.title}
-                                </h3>
-                                <hr className="my-3 border-white/10" />
-                                <p className="mb-5 text-sm lg:text-base font-medium leading-relaxed text-white/95">
-                                    {current.desc}
-                                </p>
-
-                                <hr className="mb-4 border-white/10" />
-                                <p className="mb-1 text-[10px] lg:text-[11px] font-mono uppercase tracking-widest text-[#66D9EF]">
-                                    LEGAL REFERENCE
-                                </p>
-                                <p className="text-xs lg:text-sm font-mono uppercase tracking-wide text-[#7CFF9E] drop-shadow-[0_0_8px_rgba(124,255,158,0.3)]">
-                                    {current.refLabel}
-                                </p>
-                                <p className="mt-1 text-xs lg:text-sm font-mono text-[#7CFF9E]">
-                                    {current.refDesc}
-                                </p>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  return (
+    <section
+      ref={sectionRef}
+      id="environment"
+      aria-labelledby="workspaces-heading"
+      className="w-full bg-[var(--lt-page)] pt-10 md:pt-14"
+    >
+      <div className="mx-auto max-w-[1640px] px-0 md:px-8 lg:px-14">
+        {/* Section Header + House Hairline Tabs */}
+        <div className="bg-[var(--lt-surface)] border-t border-x border-[var(--lt-line)] px-6 pt-8 pb-0 md:px-12 md:pt-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end pb-7">
+            <div className="lg:col-span-7">
+              <p className="lt-kicker">The Working Surfaces</p>
+              <h2
+                id="workspaces-heading"
+                className="lt-headline text-[clamp(2rem,3vw,2.95rem)]"
+              >
+                <span className="hl-lead">One house vocabulary.</span>{" "}
+                <em>Four specialized rooms.</em>
+              </h2>
             </div>
-        </section>
-    );
+            <div className="lg:col-span-5 lg:border-l lg:border-[var(--lt-line)] lg:pl-8">
+              <span className="block font-mono text-[9.5px] uppercase tracking-[0.14em] text-[var(--lt-quiet)] mb-2">
+                Workspace Matrix · 04 Rooms
+              </span>
+              <p className="text-[15px] leading-[1.58] text-[var(--lt-muted)]">
+                Select a workspace below to inspect how the system typesets,
+                marks, and audits legal drafts and procedural answers on the
+                page.
+              </p>
+            </div>
+          </div>
+
+          <div
+            role="tablist"
+            aria-label="LexTutor workspaces"
+            className="lt-tab-row"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeWorkspace === "draft"}
+              onClick={() => setActiveWorkspace("draft")}
+              className={`lt-tab-btn ${
+                activeWorkspace === "draft" ? "is-active" : ""
+              }`}
+            >
+              Build · Draft Lab
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeWorkspace === "practice"}
+              onClick={() => setActiveWorkspace("practice")}
+              className={`lt-tab-btn ${
+                activeWorkspace === "practice" ? "is-active" : ""
+              }`}
+            >
+              Answer · Paper Practice
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeWorkspace === "charge"}
+              onClick={() => setActiveWorkspace("charge")}
+              className={`lt-tab-btn ${
+                activeWorkspace === "charge" ? "is-active" : ""
+              }`}
+            >
+              Charge · N-ADPOPS Engine
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeWorkspace === "lexa"}
+              onClick={() => setActiveWorkspace("lexa")}
+              className={`lt-tab-btn ${
+                activeWorkspace === "lexa" ? "is-active" : ""
+              }`}
+            >
+              Review · Lexa Points
+            </button>
+          </div>
+        </div>
+
+        <div ref={panelRef}>
+          {/* WORKSPACE 1: DRAFT LAB */}
+          {activeWorkspace === "draft" && (
+            <div className="lt-leader-grid border-x border-[var(--lt-line)]">
+              <div className="lt-leader-copy">
+                <div className="lt-watermark-art" aria-hidden="true">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/assets/branding/leader-dome.webp"
+                    alt=""
+                    decoding="async"
+                    className="lt-watermark-img"
+                  />
+                </div>
+
+                <p className="lt-kicker">Draft Lab · Runtime Draft Audit</p>
+                <h3 className="lt-headline text-[clamp(2rem,2.9vw,2.85rem)] mb-4">
+                  <span className="hl-lead">Build the document</span>{" "}
+                  <em>in the order law requires.</em>
+                </h3>
+
+                <p className="text-[16px] leading-[1.56] text-[var(--lt-muted)] max-w-[52ch] mb-6">
+                  Keep the drafted instrument in view while each operative part
+                  is audited against deterministic rules and dynamic pattern
+                  checks: form, sequence, enabling authority, and legal
+                  consequence working together on a single standing sheet.
+                </p>
+
+                <div className="lt-availability mb-7">
+                  <span>Workspace</span>
+                  <strong>One document, built and audited in order</strong>
+                  <p>
+                    The examiner&rsquo;s redline strikes only the defective
+                    words, places the correction in gold beside them, and ties
+                    each mark to its margin note.
+                  </p>
+                </div>
+
+                {/* Sequential Component Spine */}
+                <div className="border-t border-[var(--lt-line)] pt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[
+                    { n: "01", name: "Caption & Court" },
+                    { n: "02", name: "Parties & Relief" },
+                    { n: "03", name: "Grounds & Facts" },
+                    { n: "04", name: "Seal & Attestation" },
+                  ].map((part) => (
+                    <div
+                      key={part.n}
+                      className="ws-animate-item border-l border-[var(--lt-line)] pl-3"
+                    >
+                      <span className="block font-mono text-[10px] text-[var(--lt-gold)] tabular-nums">
+                        {part.n}
+                      </span>
+                      <span className="font-display text-[13.5px] font-medium text-[var(--lt-ink)]">
+                        {part.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right Panel: Authentic Draft Lab Redline Surface (.dlx-mk-sheet) */}
+              <div className="lt-leader-canvas">
+                {/* Review Toolbar (matching #dlx-review-toolbar) */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-[var(--lt-line)] text-[12.5px]">
+                  <div className="flex items-center gap-4 text-[var(--lt-muted)]">
+                    <span>
+                      <b className="text-[var(--lt-ink)] font-semibold tabular-nums">
+                        8
+                      </b>{" "}
+                      verified
+                    </span>
+                    <span>
+                      <b className="text-[var(--lt-ink)] font-semibold tabular-nums">
+                        1
+                      </b>{" "}
+                      correction
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div
+                      role="group"
+                      aria-label="Document view"
+                      className="inline-flex border border-[var(--lt-line)] text-[12px]"
+                    >
+                      <button
+                        type="button"
+                        aria-pressed={markupView === "corrected"}
+                        onClick={() => setMarkupView("corrected")}
+                        className={`px-2.5 py-1 cursor-pointer transition-colors ${
+                          markupView === "corrected"
+                            ? "bg-[var(--lt-mark-gold-soft)] text-[var(--lt-ink)] font-medium"
+                            : "text-[var(--lt-muted)] hover:text-[var(--lt-ink)]"
+                        }`}
+                      >
+                        Corrected
+                      </button>
+                      <button
+                        type="button"
+                        aria-pressed={markupView === "original"}
+                        onClick={() => setMarkupView("original")}
+                        className={`px-2.5 py-1 cursor-pointer transition-colors ${
+                          markupView === "original"
+                            ? "bg-[var(--lt-mark-gold-soft)] text-[var(--lt-ink)] font-medium"
+                            : "text-[var(--lt-muted)] hover:text-[var(--lt-ink)]"
+                        }`}
+                      >
+                        Original
+                      </button>
+                    </div>
+
+                    {markupView === "corrected" && (
+                      <label className="inline-flex items-center gap-2 text-[12px] text-[var(--lt-muted)] cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={showChanges}
+                          onChange={(e) => setShowChanges(e.target.checked)}
+                          className="accent-[var(--lt-gold)]"
+                        />
+                        Show changes
+                      </label>
+                    )}
+                  </div>
+                </div>
+
+                {/* The Document Sheet */}
+                <article
+                  className="ws-animate-item dlx-mk-sheet text-[13px] leading-[1.62]"
+                  aria-label="Marked-up Motion on Notice"
+                >
+                  <div className="text-center font-bold tracking-[0.02em] uppercase mb-3">
+                    <div>IN THE HIGH COURT OF LAGOS STATE</div>
+                    <div>IN THE LAGOS JUDICIAL DIVISION</div>
+                    <div>HOLDEN AT LAGOS</div>
+                  </div>
+
+                  <div className="text-right font-mono text-[11px] mb-3">
+                    SUIT NO: LD/4192GCM/2025
+                  </div>
+
+                  <div className="mb-3 text-[12.5px]">
+                    <div className="font-semibold">BETWEEN:</div>
+                    <div className="flex justify-between items-baseline mt-1">
+                      <span>CROWNFIELD PROPERTIES LTD</span>
+                      <span className="font-mono text-[10.5px] uppercase text-[var(--lt-muted)]">
+                        CLAIMANT / APPLICANT
+                      </span>
+                    </div>
+                    <div className="my-1 font-semibold">AND</div>
+                    <div className="flex justify-between items-baseline">
+                      <span>APEX LOGISTICS NIGERIA PLC</span>
+                      <span className="font-mono text-[10.5px] uppercase text-[var(--lt-muted)]">
+                        DEFENDANT / RESPONDENT
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-center font-bold uppercase underline underline-offset-4 my-4">
+                    MOTION ON NOTICE
+                  </div>
+
+                  <p className="mb-3 text-justify">
+                    BROUGHT{" "}
+                    {markupView === "original" ? (
+                      <span>
+                        pursuant to the inherent jurisdiction of this Court only
+                      </span>
+                    ) : showChanges ? (
+                      <>
+                        <del className="dlx-mk-was">
+                          pursuant to the inherent jurisdiction of this Court
+                          only
+                        </del>
+                        <ins className="dlx-mk-now">
+                          PURSUANT TO ORDER 43 RULE 1 OF THE HIGH COURT OF LAGOS
+                          STATE (CIVIL PROCEDURE) RULES 2019 AND UNDER THE
+                          INHERENT JURISDICTION OF THIS HONOURABLE COURT
+                        </ins>
+                        <sup className="dlx-mk-n">1</sup>
+                      </>
+                    ) : (
+                      <span>
+                        PURSUANT TO ORDER 43 RULE 1 OF THE HIGH COURT OF LAGOS
+                        STATE (CIVIL PROCEDURE) RULES 2019 AND UNDER THE
+                        INHERENT JURISDICTION OF THIS HONOURABLE COURT
+                      </span>
+                    )}
+                  </p>
+
+                  <p className="mb-4 text-justify">
+                    <strong>TAKE NOTICE</strong> that this Honourable Court will
+                    be moved on Tuesday the 14th day of October 2025 at the hour
+                    of 9 o&rsquo;clock in the forenoon or so soon thereafter as
+                    Counsel on behalf of the Claimant/Applicant may be heard
+                    praying the Court for an Order of interlocutory injunction.
+                  </p>
+
+                  {/* Execution & NBA Stamp beside the signature */}
+                  <div className="mt-5 pt-3 border-t border-[var(--lt-line)] flex items-center justify-between gap-4">
+                    <div className="text-[12px] leading-[1.45]">
+                      <div>Dated this 3rd day of October 2025.</div>
+                      <div className="mt-2 font-semibold">
+                        A. P. Obembe, Esq.
+                      </div>
+                      <div className="text-[var(--lt-muted)]">
+                        Counsel to the Claimant/Applicant · Victoria Island,
+                        Lagos
+                      </div>
+                    </div>
+                    <div
+                      className="dlx-doc-nba-seal-indicator"
+                      aria-label="Nigerian Bar Association Stamp and Seal"
+                    >
+                      NBA SEAL
+                      <br />
+                      VERIFIED
+                      <br />
+                      SCN094812
+                    </div>
+                  </div>
+                </article>
+
+                {/* Connected Margin Note */}
+                <div className="ws-animate-item mt-3 border-l-2 border-[var(--lt-gold)] bg-[var(--lt-surface)] pl-4 py-2.5 pr-3">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--lt-gold)]">
+                      Note 1 · Enabling Rule
+                    </span>
+                    <span className="font-mono text-[10px] text-[var(--lt-quiet)]">
+                      Order 43 Rule 1, Lagos 2019
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[13px] leading-[1.48] text-[var(--lt-muted)]">
+                    An interlocutory motion in Lagos must state both the
+                    specific Order and Rule conferring jurisdiction and the
+                    inherent jurisdiction of the Court.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* WORKSPACE 2: PAPER PRACTICE */}
+          {activeWorkspace === "practice" && (
+            <div className="lt-leader-grid border-x border-[var(--lt-line)]">
+              <div className="lt-leader-copy">
+                <div className="lt-watermark-art" aria-hidden="true">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/assets/branding/leader-great-hall.webp"
+                    alt=""
+                    decoding="async"
+                    className="lt-watermark-img"
+                  />
+                </div>
+
+                <p className="lt-kicker">Paper Practice</p>
+                <h3 className="lt-headline text-[clamp(2rem,2.9vw,2.85rem)] mb-4">
+                  <span className="hl-lead">Answer the past paper.</span>{" "}
+                  <em>See where you trip.</em>
+                </h3>
+
+                <p className="text-[16px] leading-[1.56] text-[var(--lt-muted)] max-w-[52ch] mb-6">
+                  Every Bar Finals sitting from 2010 to 2025. The hybrid
+                  evaluation pipeline reads your answer clause by clause, names
+                  the exact procedural omission, and places your attempt from{" "}
+                  <em>Not quite</em> to <em>Exam-ready</em>.
+                </p>
+
+                <div className="lt-availability mb-7">
+                  <span>Status</span>
+                  <strong>Readiness, per attempt</strong>
+                  <p>
+                    Procedure checked. Omissions named. Progress tracked across
+                    every question part.
+                  </p>
+                </div>
+
+                <div className="border-t border-[var(--lt-line)] pt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[
+                    "Court & Procedure",
+                    "Omission & Consequence",
+                    "Authority & Pinpoint",
+                    "Readiness & Progress",
+                  ].map((item, idx) => (
+                    <div
+                      key={item}
+                      className="ws-animate-item border-l border-[var(--lt-line)] pl-3"
+                    >
+                      <span className="block font-mono text-[10px] text-[var(--lt-gold)] tabular-nums">
+                        0{idx + 1}
+                      </span>
+                      <span className="font-display text-[13.5px] font-medium text-[var(--lt-ink)]">
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="lt-leader-canvas">
+                {/* Readiness Ladder Header */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-[var(--lt-line)]">
+                  <div>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--lt-gold)]">
+                      Civil Litigation · 2024 Question 1(b)
+                    </span>
+                    <h4 className="font-display text-[16px] font-medium text-[var(--lt-ink)]">
+                      Summary Judgment under Order 13 Rule 1
+                    </h4>
+                  </div>
+                  <div
+                    className="inline-flex font-mono text-[10px] uppercase tracking-[0.1em]"
+                    aria-label="Readiness ladder"
+                  >
+                    {["Not quite", "Developing", "Close", "Exam-ready"].map(
+                      (step) => (
+                        <span
+                          key={step}
+                          className={`px-2.5 py-1.5 border-b ${
+                            step === "Close"
+                              ? "border-b-2 border-[var(--lt-gold)] text-[var(--lt-ink)] font-semibold"
+                              : "border-[var(--lt-line)] text-[var(--lt-quiet)]"
+                          }`}
+                        >
+                          {step}
+                        </span>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                {/* Candidate Answer & Clause Audit */}
+                <div className="bg-[var(--lt-line)] border border-[var(--lt-line)] grid gap-[1px]">
+                  <div className="ws-animate-item bg-[var(--lt-surface)] p-5">
+                    <span className="block font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--lt-muted)] mb-2">
+                      Your Answer · Proposition 2
+                    </span>
+                    <p className="font-serif text-[14px] leading-[1.6] text-[var(--lt-ink)]">
+                      &ldquo;To enter summary judgment in Lagos under Order 13
+                      Rule 1, the Claimant shall file a Writ of Summons
+                      accompanied by the Statement of Claim, list of witnesses,
+                      written statements on oath, and a Motion on Notice
+                      supported by an affidavit.&rdquo;
+                    </p>
+                  </div>
+
+                  <div className="ws-animate-item bg-[var(--lt-surface)] p-5">
+                    <div className="flex items-baseline justify-between gap-2 mb-1.5">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--lt-gold)]">
+                        Lexa&rsquo;s Reading · Missing Document
+                      </span>
+                      <span className="font-mono text-[10px] text-[var(--lt-quiet)]">
+                        Order 13 Rule 1, Lagos 2019
+                      </span>
+                    </div>
+                    <p className="text-[13.5px] leading-[1.52] text-[var(--lt-ink)] mb-2">
+                      You listed the originating processes and the Motion on
+                      Notice, but omitted the{" "}
+                      <strong className="text-[var(--lt-gold)] font-semibold">
+                        Written Brief in support of the application
+                      </strong>
+                      .
+                    </p>
+                    <p className="text-[13px] leading-[1.48] text-[var(--lt-muted)]">
+                      Under Order 13 Rule 1 of the Lagos Rules 2019, the
+                      application for summary judgment must be accompanied by an
+                      affidavit stating the grounds for belief that there is no
+                      defence, copies of exhibits, and a Written Brief.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* WORKSPACE 3: CRIMINAL CHARGE ENGINE */}
+          {activeWorkspace === "charge" && (
+            <div className="lt-leader-grid border-x border-[var(--lt-line)]">
+              <div className="lt-leader-copy">
+                <div className="lt-watermark-art" aria-hidden="true">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/assets/branding/temple_etching_light.webp"
+                    alt=""
+                    decoding="async"
+                    className="lt-watermark-img"
+                  />
+                </div>
+
+                <p className="lt-kicker">Criminal Litigation · Charge Engine</p>
+                <h3 className="lt-headline text-[clamp(2rem,2.9vw,2.85rem)] mb-4">
+                  <span className="hl-lead">Draft the charge.</span>{" "}
+                  <em>Test every count by statute.</em>
+                </h3>
+
+                <p className="text-[16px] leading-[1.56] text-[var(--lt-muted)] max-w-[52ch] mb-6">
+                  Every count on a charge sheet or information is parsed against
+                  the nine statutory requirements of Sections 194 to 209 of the
+                  Administration of Criminal Justice Act 2015—catching
+                  duplicity, misjoinder, and definition-versus-punishment
+                  section errors.
+                </p>
+
+                <div className="lt-availability mb-7">
+                  <span>Gate Architecture</span>
+                  <strong>Nine deterministic statutory gates per count</strong>
+                  <p>
+                    Audits Accused identity, Date, Place, Offence, Victim,
+                    Particulars, Creating Section, Punishment Section, and the
+                    Rule Against Duplicity.
+                  </p>
+                </div>
+              </div>
+
+              <div className="lt-leader-canvas">
+                <div className="flex items-baseline justify-between gap-4 pb-3 mb-4 border-b border-[var(--lt-line)]">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--lt-gold)]">
+                    Count One · Statutory Sufficiency Audit
+                  </span>
+                  <span className="font-mono text-[10px] text-[var(--lt-quiet)]">
+                    ACJA 2015 s. 196 &amp; s. 209
+                  </span>
+                </div>
+
+                <div className="ws-animate-item dlx-mk-sheet text-[13px] leading-[1.6] mb-4">
+                  <div className="text-center font-bold uppercase mb-2">
+                    IN THE HIGH COURT OF THE FEDERAL CAPITAL TERRITORY
+                    <br />
+                    IN THE ABUJA JUDICIAL DIVISION
+                  </div>
+                  <div className="font-bold uppercase underline underline-offset-4 my-2">
+                    COUNT ONE
+                  </div>
+                  <p className="text-justify">
+                    That you, <strong>MUSA DANJUMA</strong>, on or about the
+                    12th day of May 2025 at Wuse Zone 4 within the Abuja
+                    Judicial Division,{" "}
+                    <del className="dlx-mk-was">
+                      robbed Chidi Okafor and Emeka Nwosu of their laptops
+                    </del>
+                    <ins className="dlx-mk-now">
+                      robbed Chidi Okafor of one Apple MacBook Pro laptop while
+                      armed with a firearm
+                    </ins>
+                    <sup className="dlx-mk-n">1</sup> and thereby committed an
+                    offence punishable under{" "}
+                    <strong>
+                      Section 1(2)(a) of the Robbery and Firearms (Special
+                      Provisions) Act
+                    </strong>
+                    .
+                  </p>
+                </div>
+
+                {/* 9-Gate Ledger */}
+                <div className="bg-[var(--lt-line)] border border-[var(--lt-line)] grid grid-cols-3 gap-[1px] font-mono text-[10.5px]">
+                  {[
+                    { gate: "01 Accused", state: "Verified" },
+                    { gate: "02 Date", state: "Verified" },
+                    { gate: "03 Place", state: "Verified" },
+                    { gate: "04 Offence", state: "Verified" },
+                    { gate: "05 Victim", state: "Split Count" },
+                    { gate: "06 Weapon", state: "Verified" },
+                    { gate: "07 Statute", state: "Verified" },
+                    { gate: "08 Section 1(2)(a)", state: "Verified" },
+                    { gate: "09 Duplicity Rule", state: "Corrected" },
+                  ].map((item) => (
+                    <div
+                      key={item.gate}
+                      className="ws-animate-item bg-[var(--lt-surface)] px-3 py-2.5 flex items-center justify-between gap-2"
+                    >
+                      <span className="text-[var(--lt-ink)] truncate">
+                        {item.gate}
+                      </span>
+                      <span
+                        className={
+                          item.state === "Verified"
+                            ? "text-[var(--lt-quiet)]"
+                            : "text-[var(--lt-gold)] font-semibold"
+                        }
+                      >
+                        {item.state}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* WORKSPACE 4: LEXA POINTS */}
+          {activeWorkspace === "lexa" && (
+            <div className="lt-leader-grid border-x border-[var(--lt-line)]">
+              <div className="lt-leader-copy">
+                <p className="lt-kicker">Lexa Points</p>
+                <h3 className="lt-headline text-[clamp(2rem,2.9vw,2.85rem)] mb-4">
+                  <span className="hl-lead">Read the answer</span>{" "}
+                  <em>at the point it turns.</em>
+                </h3>
+
+                <p className="text-[16px] leading-[1.56] text-[var(--lt-muted)] max-w-[52ch] mb-6">
+                  Lexa places recognition, correction, non-advancing points, and
+                  the next point to develop beside the exact sentence that
+                  prompted each finding—and keeps a standing file of your
+                  progress across sessions.
+                </p>
+
+                <div className="lt-availability mb-7">
+                  <span>Your file</span>
+                  <strong>Every completed review, kept</strong>
+                  <p>
+                    Every note in Lexa&rsquo;s console is grounded in a specific
+                    attempt and names the question part it rests on.
+                  </p>
+                </div>
+
+                {/* Authentic Lexa Console Feed Rows */}
+                <div className="border-t border-[var(--lt-line)]">
+                  {[
+                    {
+                      n: "01",
+                      tag: "Pre-action notice vs. contractual arbitration clause",
+                      time: "2M AGO",
+                      snippet:
+                        "Based on 2023 Q4(a) · You treated the arbitration clause as ousting jurisdiction rather than a ground for stay under s. 5 AMA 2023.",
+                    },
+                    {
+                      n: "02",
+                      tag: "Electronic document certificate under Section 84(4)",
+                      time: "1H AGO",
+                      snippet:
+                        "Based on 2022 Q1(c) · Your foundation named device reliability but left out the maker's signature and capacity on the certificate.",
+                    },
+                  ].map((note) => (
+                    <div
+                      key={note.n}
+                      className="ws-animate-item grid grid-cols-[42px_minmax(0,1fr)_auto] gap-x-3 gap-y-1.5 items-baseline py-4 border-b border-[var(--lt-line)]"
+                    >
+                      <span className="row-span-2 self-start font-sans text-[22px] leading-none text-[var(--lt-gold)] tabular-nums">
+                        {note.n}
+                      </span>
+                      <strong className="font-sans text-[16.5px] font-medium tracking-[-0.01em] text-[var(--lt-ink)] truncate">
+                        {note.tag}
+                      </strong>
+                      <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--lt-muted)] tabular-nums">
+                        {note.time}
+                      </span>
+                      <p className="col-span-2 font-sans text-[13.5px] leading-[1.48] text-[var(--lt-muted)]">
+                        {note.snippet}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right Panel: Authentic Framed Intaglio Plate of Lady Justice */}
+              <div
+                className="lt-picture-panel"
+                aria-label="A statue of Justice, blindfolded, holding scales and a sword"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/assets/branding/leader-justice-dark.webp"
+                  alt="A statue of Justice, blindfolded, holding scales and a sword"
+                  decoding="async"
+                  className="lt-only-dark absolute inset-0 h-full w-full object-cover object-[50%_12%] select-none"
+                />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/assets/branding/leader-justice.webp"
+                  alt="A statue of Justice, blindfolded, holding scales and a sword"
+                  decoding="async"
+                  className="lt-only-light absolute inset-0 h-full w-full object-cover object-[50%_12%] mix-blend-multiply select-none"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
 }

@@ -1,154 +1,109 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
-import { Button } from "./ui/button";
+import { useState } from "react";
 
 export default function CTA() {
-    const containerRef = useRef(null);
+  const [copied, setCopied] = useState(false);
 
-    useLayoutEffect(() => {
-        let handoffLoop: gsap.core.Timeline | null = null;
-        let accentLoop: gsap.core.Timeline | null = null;
-        let ctaObserver: IntersectionObserver | null = null;
+  const handleCopyEmail = () => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText("paul@lextutor.online");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2400);
+    }
+  };
 
-        const setWaveState = (target: "none" | "secondary" | "primary") => {
-            const scope = containerRef.current as HTMLElement | null;
-            if (!scope) return;
+  return (
+    <section
+      id="cta"
+      aria-labelledby="cta-heading"
+      className="w-full bg-[var(--lt-page)] pt-8 md:pt-10 pb-10 md:pb-12"
+    >
+      <div className="mx-auto max-w-[1640px] px-0 md:px-8 lg:px-14">
+        <div className="relative overflow-hidden bg-[var(--lt-surface)] border border-[var(--lt-line)] px-6 py-8 md:px-12 md:py-11 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          {/* Caryatid Frieze Etching (dimmed watermark so foreground text pops) */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none select-none absolute top-0 right-0 w-[300px] sm:w-[380px] md:w-[460px] aspect-[16/10] opacity-[0.18]"
+            style={{
+              maskImage:
+                "radial-gradient(ellipse 92% 88% at 88% 18%, #000 24%, rgba(0,0,0,0.45) 58%, transparent 92%)",
+              WebkitMaskImage:
+                "radial-gradient(ellipse 92% 88% at 88% 18%, #000 24%, rgba(0,0,0,0.45) 58%, transparent 92%)",
+            }}
+          >
+            <img
+              src="/assets/branding/caryatid_frieze_dark.webp"
+              alt=""
+              className="lt-art-dark w-full h-full object-cover object-right-top"
+            />
+            <img
+              src="/assets/branding/caryatid_frieze_light.webp"
+              alt=""
+              className="lt-art-light w-full h-full object-cover object-right-top"
+            />
+          </div>
 
-            const primaryBtn = scope.querySelector(".cta-primary-btn");
-            const secondaryLabel = scope.querySelector(".cta-secondary-label");
-            if (!primaryBtn || !secondaryLabel) return;
+          {/* Left: Compact Kicker + Heading + 1-line Note */}
+          <div className="relative z-10 max-w-[56ch]">
+            <p className="lt-kicker mb-1.5">Contact &amp; Inquiries</p>
+            <h2
+              id="cta-heading"
+              className="lt-headline text-[clamp(1.6rem,2.3vw,2.2rem)] mb-2"
+            >
+              <span className="hl-lead">Preparing for release.</span>{" "}
+              <em>Get in touch with us.</em>
+            </h2>
+            <p className="text-[14.5px] leading-[1.52] text-[var(--lt-muted)]">
+              For general inquiries, institutional correspondence, or launch
+              updates, reach out directly.
+            </p>
+          </div>
 
-            primaryBtn.classList.toggle("cta-primary-btn-wave", target === "primary");
-            secondaryLabel.classList.toggle("cta-wave-text", target === "secondary");
-        };
-
-        const stopWaveLoop = () => {
-            if (handoffLoop) {
-                handoffLoop.kill();
-                handoffLoop = null;
-            }
-            setWaveState("none");
-        };
-
-        const startWaveLoop = () => {
-            if (handoffLoop) return;
-            handoffLoop = gsap.timeline({ repeat: -1 });
-            handoffLoop
-                .add(() => setWaveState("secondary"))
-                .to({}, { duration: 1.15 })
-                .add(() => setWaveState("primary"))
-                .to({}, { duration: 1.15 });
-        };
-
-        const stopAccentLoop = () => {
-            if (accentLoop) {
-                accentLoop.kill();
-                accentLoop = null;
-            }
-            stopWaveLoop();
-        };
-
-        const startAccentLoop = () => {
-            if (accentLoop) return;
-            accentLoop = gsap.timeline({ repeat: -1 });
-            accentLoop
-                .add(() => setWaveState("none"))
-                .to({}, { duration: 2.19 })
-                .add(() => startWaveLoop())
-                .to({}, { duration: 2.3 })
-                .add(() => stopWaveLoop());
-        };
-
-        const ctx = gsap.context(() => {
-            gsap.from(".cta-content", {
-                scrollTrigger: {
-                    trigger: ".cta-section",
-                    start: "top 80%",
-                },
-                y: 40,
-                opacity: 0,
-                duration: 1,
-                ease: "power2.out"
-            });
-
-            // Gradient shift
-            gsap.to(".cta-gradient", {
-                scrollTrigger: {
-                    trigger: ".cta-section",
-                    start: "top bottom",
-                    end: "bottom top",
-                    scrub: 1
-                },
-                yPercent: -20,
-                ease: "none"
-            });
-
-            const sectionEl = containerRef.current as HTMLElement | null;
-            if (!sectionEl) return;
-
-            ctaObserver = new IntersectionObserver(
-                (entries) => {
-                    const entry = entries[0];
-                    if (!entry) return;
-                    if (entry.isIntersecting && entry.intersectionRatio >= 0.28) {
-                        startAccentLoop();
-                    } else {
-                        stopAccentLoop();
-                    }
-                },
-                { threshold: [0, 0.2, 0.28, 0.4, 0.6] }
-            );
-
-            ctaObserver.observe(sectionEl);
-
-            // Immediate check so it works when landing directly on this section.
-            const rect = sectionEl.getBoundingClientRect();
-            const vh = window.innerHeight || document.documentElement.clientHeight;
-            const visiblePx = Math.max(0, Math.min(rect.bottom, vh) - Math.max(rect.top, 0));
-            if (visiblePx / Math.max(1, vh) >= 0.28) {
-                startAccentLoop();
-            }
-        }, containerRef);
-
-        return () => {
-            if (ctaObserver) {
-                ctaObserver.disconnect();
-                ctaObserver = null;
-            }
-            stopAccentLoop();
-            ctx.revert();
-        };
-    }, []);
-
-    return (
-        <section id="cta" ref={containerRef} className="cta-section relative py-20 md:py-32 overflow-hidden flex items-center justify-center min-h-[52vh] md:min-h-[60vh] bg-foreground text-background">
-
-            {/* Animated Gradient Background */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="cta-gradient absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-background/10 via-transparent to-transparent opacity-40"></div>
+          {/* Right: Direct Contact + Copy Address Action */}
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-5 lg:gap-8 lg:border-l lg:border-[var(--lt-line)] lg:pl-8">
+            <div>
+              <span className="block font-mono text-[9.5px] uppercase tracking-[0.14em] text-[var(--lt-quiet)]">
+                Direct Correspondence
+              </span>
+              <strong className="block font-display text-[15.5px] font-medium text-[var(--lt-ink)] mt-0.5">
+                Ayooluwa Paul Obembe, Esq.
+              </strong>
+              <span className="text-[12.5px] text-[var(--lt-muted)]">
+                Founder &amp; Lead Systems Architect
+              </span>
             </div>
 
-            <div className="cta-content relative z-10 max-w-3xl mx-auto text-center px-4 md:px-6">
-                <h2 className="cta-heading font-heading text-3xl md:text-6xl font-medium mb-5 md:mb-8 tracking-tight text-balance">
-                    Ready to Structure Your Practice?
-                </h2>
-                <p className="cta-subtext text-secondary/80 text-base md:text-xl mb-8 md:mb-12 max-w-2xl mx-auto leading-relaxed">
-                    Join the legal professionals using LexTutor to amplify their expertise with intelligent, agentic workflows.
-                </p>
-                <div className="flex flex-col sm:flex-row justify-center gap-3 md:gap-4">
-                    <Button size="lg" className="cta-primary-btn rounded-full h-12 md:h-14 px-7 md:px-8 text-[0.95rem] md:text-base font-medium bg-background text-foreground hover:bg-background/90 hover:-translate-y-[2px] transition-all duration-[180ms] shadow-lg hover:shadow-xl">
-                        <span>Get Started Now</span>
-                    </Button>
-                    <Button variant="outline" size="lg" className="rounded-full h-12 md:h-14 px-7 md:px-8 text-[0.95rem] md:text-base font-medium border-background/20 text-background bg-transparent hover:bg-background/10 hover:-translate-y-[2px] transition-all duration-[180ms]">
-                        <span className="cta-secondary-label">Schedule Demo</span>
-                    </Button>
-                </div>
+            <div className="flex flex-wrap items-center gap-5">
+              <button
+                type="button"
+                onClick={handleCopyEmail}
+                className="lt-btn-primary cursor-pointer"
+              >
+                <span>{copied ? "Address copied" : "Copy address"}</span>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  {copied ? (
+                    <path d="M5 13l4 4L19 7" />
+                  ) : (
+                    <>
+                      <rect x="9" y="9" width="11" height="11" rx="1.5" />
+                      <path d="M5 15H4a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 4 3h9a1.5 1.5 0 0 1 1.5 1.5v1" />
+                    </>
+                  )}
+                </svg>
+              </button>
             </div>
-        </section>
-    );
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }

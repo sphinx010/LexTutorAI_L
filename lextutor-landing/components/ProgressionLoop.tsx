@@ -1,330 +1,290 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
-import Image from "next/image";
+import { useRef, useState } from "react";
 import gsap from "gsap";
-import DottedArrow from "./DottedArrow";
-import { Inter } from "next/font/google";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "700", "800"],
-  variable: "--font-inter",
-  display: "swap",
+gsap.registerPlugin(ScrollTrigger);
+
+const FIVE_COURSES = [
+  {
+    code: "01",
+    name: "Civil Litigation",
+    statutes:
+      "High Court Civil Procedure Rules (Lagos 2019 & FCT 2018) · Evidence Act 2011",
+    processes:
+      "Writ of Summons, Originating Summons, Motion on Notice, Summary Judgment, Notice to Quit",
+    sittings: "2010–2025 Sittings",
+    module: "Draft Lab & Paper Practice",
+  },
+  {
+    code: "02",
+    name: "Criminal Litigation",
+    statutes:
+      "Administration of Criminal Justice Act 2015 · ACJL Lagos · Evidence Act 2011",
+    processes:
+      "Magistrate & High Court Charges, Bail Summons & Motions, Trial-Within-Trial, Final Written Addresses",
+    sittings: "2010–2025 Sittings",
+    module: "N-ADPOPS 9-Gate Charge Engine",
+  },
+  {
+    code: "03",
+    name: "Corporate Law Practice",
+    statutes: "Companies and Allied Matters Act 2020 · FCCPA 2018 · ISA 2007",
+    processes:
+      "Board & Special Resolutions, Statutory Notices, Restructuring Schemes, Winding-Up Petitions",
+    sittings: "2010–2025 Sittings",
+    module: "Transactional & Regulatory Schemas",
+  },
+  {
+    code: "04",
+    name: "Property Law Practice",
+    statutes:
+      "Land Use Act 1978 · Lagos Land Registration Law 2015 · Wills Law · MPL 2010",
+    processes:
+      "Deeds of Assignment, Legal Mortgages, Leases, Powers of Attorney, Wills & Codicils, Probate",
+    sittings: "2010–2025 Sittings",
+    module: "Conveyancing & Perfection Audit",
+  },
+  {
+    code: "05",
+    name: "Professional Ethics & Skills",
+    statutes:
+      "Rules of Professional Conduct 2023 · Legal Practitioners Act · Money Laundering Act 2022",
+    processes:
+      "Legal Opinions, Client Letters, Bills of Charges, Contempt & LPDC Disciplinary Procedure",
+    sittings: "2010–2025 Sittings",
+    module: "Statutory & Ethical Compliance",
+  },
+] as const;
+
+const SAMPLE_PLAN_DAYS = Array.from({ length: 30 }, (_, i) => {
+  const day = i + 1;
+  const status: "done" | "current" | "upcoming" =
+    day < 12 ? "done" : day === 12 ? "current" : "upcoming";
+  return { day, status };
 });
 
-type Stage = {
-  id: string;
-  tagline: string;
-  headline: string;
-  text: string;
-  imageSrc: string;
-  stageLabel: string;
-  surface: string;
-};
-
-const stages: Stage[] = [
-  {
-    id: "intro",
-    tagline: "THE PROGRESSION ENGINE",
-    headline: "LEGAL COMPETENCE, COMPOUNDED",
-    text: "A structured AI system that continuously levels legal judgment from recall to elite execution.",
-    imageSrc: "/images/instant-synthesis.png",
-    stageLabel: "SYSTEM PRIMER",
-    surface: "#D6EEDC",
-  },
-  {
-    id: "junior",
-    tagline: "THE FOUNDATION",
-    headline: "JUNIOR COUNSEL",
-    text: "Mastery of procedural rules, statute hierarchy, and foundational case-law retrieval.",
-    imageSrc: "/images/junior.jpg",
-    stageLabel: "STAGE 01 / 04",
-    surface: "#F2A486",
-  },
-  {
-    id: "associate",
-    tagline: "THE ARCHITECT",
-    headline: "ASSOCIATE STRATEGIST",
-    text: "Synthesis of complex legal arguments across jurisdictions with disciplined drafting flow.",
-    imageSrc: "/images/associate.jpg",
-    stageLabel: "STAGE 02 / 04",
-    surface: "#BFE5D0",
-  },
-  {
-    id: "senior",
-    tagline: "THE AUTHORITY",
-    headline: "SENIOR ADVOCATE",
-    text: "Advanced architectural mastery for high-stakes strategic reasoning and legal precision.",
-    imageSrc: "/images/SAN.jpg",
-    stageLabel: "STAGE 03 / 04",
-    surface: "#E8CFA5",
-  },
-  {
-    id: "lead",
-    tagline: "THE VISIONARY",
-    headline: "LEAD LITIGATOR",
-    text: "Precision orchestration across discovery, motion practice, and courtroom execution.",
-    imageSrc: "/images/lead.jpg",
-    stageLabel: "STAGE 04 / 04",
-    surface: "#9CCCEE",
-  },
-];
-
 export default function ProgressionLoop() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-
+  const [selectedDay, setSelectedDay] = useState<number>(12);
   const sectionRef = useRef<HTMLElement | null>(null);
-  const textWrapRef = useRef<HTMLDivElement | null>(null);
-  const taglineRef = useRef<HTMLParagraphElement | null>(null);
-  const headlineRef = useRef<HTMLHeadingElement | null>(null);
-  const bodyRef = useRef<HTMLParagraphElement | null>(null);
-  const stageRef = useRef<HTMLParagraphElement | null>(null);
-  const imageWrapRef = useRef<HTMLDivElement | null>(null);
-  const progressFillRef = useRef<HTMLDivElement | null>(null);
-  const activeIndexRef = useRef(0);
-  const isTransitioningRef = useRef(false);
-  const transitionGuardRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const touchStartXRef = useRef<number | null>(null);
-  const touchStartYRef = useRef<number | null>(null);
+  const coursesRef = useRef<HTMLDivElement | null>(null);
+  const planStripRef = useRef<HTMLOListElement | null>(null);
 
-  const activeStage = stages[activeIndex];
+  useGSAP(
+    () => {
+      if (coursesRef.current) {
+        const rows = coursesRef.current.querySelectorAll(".course-ledger-row");
+        gsap.fromTo(
+          rows,
+          { opacity: 0, y: 14 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.52,
+            stagger: 0.075,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: coursesRef.current,
+              start: "top 82%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      }
 
-  activeIndexRef.current = activeIndex;
-  isTransitioningRef.current = isTransitioning;
-
-  const progressPercentage = `${((activeIndex + 1) / stages.length) * 100}%`;
-
-  const transitionTo = (nextIndex: number) => {
-    if (isTransitioningRef.current) return;
-
-    const normalized = (nextIndex + stages.length) % stages.length;
-    if (normalized === activeIndexRef.current) return;
-
-    setIsTransitioning(true);
-    isTransitioningRef.current = true;
-    if (transitionGuardRef.current) {
-      clearTimeout(transitionGuardRef.current);
-      transitionGuardRef.current = null;
-    }
-    transitionGuardRef.current = setTimeout(() => {
-      setIsTransitioning(false);
-      isTransitioningRef.current = false;
-      transitionGuardRef.current = null;
-    }, 1600);
-
-    const tl = gsap.timeline({
-      defaults: { overwrite: "auto" },
-      onComplete: () => setActiveIndex(normalized),
-      onInterrupt: () => {
-        if (transitionGuardRef.current) {
-          clearTimeout(transitionGuardRef.current);
-          transitionGuardRef.current = null;
-        }
-        setIsTransitioning(false);
-        isTransitioningRef.current = false;
-      },
-    });
-
-    if (taglineRef.current && headlineRef.current && bodyRef.current && stageRef.current) {
-      tl.to(
-        [taglineRef.current, headlineRef.current, bodyRef.current, stageRef.current],
-        { autoAlpha: 0, y: 20, duration: 0.28, ease: "power3.inOut" },
-        0
-      );
-    }
-
-    if (sectionRef.current) {
-      tl.to(
-        sectionRef.current,
-        { backgroundColor: stages[normalized].surface, duration: 0.8, ease: "power3.inOut" },
-        0
-      );
-    }
-
-    if (imageWrapRef.current) {
-      tl.to(
-        imageWrapRef.current,
-        { autoAlpha: 0, y: 20, scale: 1.05, duration: 0.28, ease: "power3.inOut" },
-        0
-      );
-    }
-  };
-
-  useLayoutEffect(() => {
-    if (
-      !sectionRef.current ||
-      !textWrapRef.current ||
-      !taglineRef.current ||
-      !headlineRef.current ||
-      !bodyRef.current ||
-      !stageRef.current ||
-      !imageWrapRef.current ||
-      !progressFillRef.current
-    ) {
-      return;
-    }
-
-    gsap.set(sectionRef.current, { backgroundColor: stages[0].surface });
-    gsap.set(textWrapRef.current, { autoAlpha: 1, y: 0 });
-    gsap.set([taglineRef.current, headlineRef.current, bodyRef.current, stageRef.current], { autoAlpha: 1, y: 0 });
-    gsap.set(imageWrapRef.current, { autoAlpha: 1, y: 0, scale: 1 });
-    gsap.set(progressFillRef.current, { width: `${100 / stages.length}%` });
-  }, []);
-
-  useLayoutEffect(() => {
-    if (
-      !taglineRef.current ||
-      !headlineRef.current ||
-      !bodyRef.current ||
-      !stageRef.current ||
-      !imageWrapRef.current ||
-      !progressFillRef.current
-    ) {
-      return;
-    }
-
-    const tl = gsap.timeline({
-      defaults: { overwrite: "auto" },
-      onComplete: () => {
-        if (transitionGuardRef.current) {
-          clearTimeout(transitionGuardRef.current);
-          transitionGuardRef.current = null;
-        }
-        setIsTransitioning(false);
-        isTransitioningRef.current = false;
-      },
-    });
-
-    tl.fromTo(
-      imageWrapRef.current,
-      { autoAlpha: 0, y: 20, scale: 0.95 },
-      { autoAlpha: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.inOut" },
-      0
-    )
-      .fromTo(
-        [taglineRef.current, headlineRef.current, bodyRef.current],
-        { autoAlpha: 0, y: 20 },
-        { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power3.inOut" },
-        0.1
-      )
-      .fromTo(
-        stageRef.current,
-        { autoAlpha: 0, y: 20 },
-        { autoAlpha: 1, y: 0, duration: 0.5, ease: "power3.inOut" },
-        0.35
-      )
-      .to(progressFillRef.current, { width: progressPercentage, duration: 0.8, ease: "power3.inOut" }, 0);
-
-    return () => {
-      tl.kill();
-    };
-  }, [activeIndex, progressPercentage]);
-
-  useLayoutEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowRight") transitionTo(activeIndexRef.current + 1);
-      if (event.key === "ArrowLeft") transitionTo(activeIndexRef.current - 1);
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  const prev = () => transitionTo(activeIndex - 1);
-  const next = () => transitionTo(activeIndex + 1);
-
-  const handleTouchStart = (event: React.TouchEvent<HTMLElement>) => {
-    const touch = event.changedTouches[0];
-    touchStartXRef.current = touch.clientX;
-    touchStartYRef.current = touch.clientY;
-  };
-
-  const handleTouchEnd = (event: React.TouchEvent<HTMLElement>) => {
-    if (touchStartXRef.current === null || touchStartYRef.current === null) return;
-
-    const touch = event.changedTouches[0];
-    const dx = touch.clientX - touchStartXRef.current;
-    const dy = touch.clientY - touchStartYRef.current;
-
-    touchStartXRef.current = null;
-    touchStartYRef.current = null;
-
-    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return;
-    if (dx < 0) transitionTo(activeIndexRef.current + 1);
-    if (dx > 0) transitionTo(activeIndexRef.current - 1);
-  };
+      if (planStripRef.current) {
+        const cells =
+          planStripRef.current.querySelectorAll(".plan-strip-mark");
+        gsap.fromTo(
+          cells,
+          { opacity: 0, scaleY: 0, transformOrigin: "bottom center" },
+          {
+            opacity: 1,
+            scaleY: 1,
+            duration: 0.45,
+            stagger: 0.022,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: planStripRef.current,
+              start: "top 86%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      }
+    },
+    { scope: sectionRef }
+  );
 
   return (
     <section
-      id="growth"
       ref={sectionRef}
-      className={`${inter.variable} relative h-[90vh] w-full overflow-hidden`}
-      style={{ backgroundColor: activeStage.surface }}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
+      id="domains"
+      aria-labelledby="domains-heading"
+      className="w-full bg-[var(--lt-page)] pt-10 md:pt-14"
     >
-      <div className="mx-auto grid h-full w-full max-w-[1920px] grid-cols-1 px-6 py-10 md:px-10 md:py-11 lg:grid-cols-2 lg:items-center lg:px-16 lg:py-12">
-        <div ref={textWrapRef} className="flex items-center">
-          <div className="max-w-[680px]">
-            <p ref={taglineRef} className="text-[0.72rem] font-semibold uppercase tracking-[0.26em] text-[#4B5563] [font-family:var(--font-inter)]">
-              {activeStage.tagline}
-            </p>
-
-            <h2 ref={headlineRef} className="mt-4 font-[var(--font-inter)] text-4xl font-extrabold leading-[0.9] tracking-[-0.03em] text-[#111827] sm:text-5xl lg:text-6xl xl:text-7xl">
-              {activeStage.headline}
-            </h2>
-
-            <p ref={bodyRef} className="mt-5 max-w-[45ch] text-base leading-relaxed text-[#374151] md:text-lg">
-              {activeStage.text}
-            </p>
-
-            <p ref={stageRef} className="mt-6 text-[0.72rem] uppercase tracking-[0.24em] text-[#4B5563] [font-family:var(--font-inter)]">
-              {activeStage.stageLabel}
-            </p>
-
-            <div className="mt-6 w-[360px] md:w-[400px] max-w-full">
-              <div className="h-[1px] w-full bg-black/25">
-                <div ref={progressFillRef} className="h-[1px] bg-[#111827]" />
-              </div>
+      <div className="mx-auto max-w-[1640px] px-0 md:px-8 lg:px-14">
+        {/* Five Courses Connected Ledger */}
+        <div className="bg-[var(--lt-surface)] border-t border-x border-[var(--lt-line)] px-6 py-8 md:px-12 md:py-11">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
+            <div className="lg:col-span-7">
+              <p className="lt-kicker">Domain Implementation</p>
+              <h2
+                id="domains-heading"
+                className="lt-headline text-[clamp(2rem,3vw,2.95rem)]"
+              >
+                <span className="hl-lead">One evaluation engine.</span>{" "}
+                <em>Five Bar Finals courses.</em>
+              </h2>
             </div>
-
-            <div className="mt-5 flex items-center justify-between text-sm font-medium uppercase tracking-[0.2em] text-[#1F2937] [font-family:var(--font-inter)] w-[360px] md:w-[400px] max-w-full">
-              <button
-                type="button"
-                onClick={prev}
-                className="inline-flex items-center gap-3 opacity-85 transition hover:opacity-100 hover:-translate-x-0.5 disabled:opacity-45"
-              >
-                <DottedArrow direction="left" className="h-4 w-4 md:h-5 md:w-5" />
-                Prev
-              </button>
-              <button
-                type="button"
-                onClick={next}
-                className="group inline-flex items-center gap-3 opacity-85 transition hover:opacity-100 hover:translate-x-0.5 disabled:opacity-45"
-              >
-                Next
-                <DottedArrow direction="right" className="h-4 w-4 md:h-5 md:w-5" />
-              </button>
+            <div className="lg:col-span-5 lg:border-l lg:border-[var(--lt-line)] lg:pl-8">
+              <span className="block font-mono text-[9.5px] uppercase tracking-[0.14em] text-[var(--lt-quiet)] mb-2">
+                Production Proof-of-Concept · 2010–2025 Corpus
+              </span>
+              <p className="text-[15px] leading-[1.58] text-[var(--lt-muted)]">
+                While the underlying hybrid evaluation architecture is
+                domain-agnostic, its full production proof-of-concept spans all
+                five compulsory courses of the Nigerian Law School Bar Part II
+                examination.
+              </p>
             </div>
           </div>
         </div>
 
+        {/* Courses Rows */}
         <div
-          ref={imageWrapRef}
-          className="mt-10 flex items-center justify-center lg:mt-0 lg:justify-end lg:pr-8"
+          ref={coursesRef}
+          className="bg-[var(--lt-line)] border border-[var(--lt-line)] grid gap-[1px]"
         >
-          <div className="relative aspect-[4/3] w-full max-w-[640px] lg:max-w-[760px] xl:max-w-[840px]">
-            <Image
-              key={activeStage.id}
-              src={activeStage.imageSrc}
-              alt={activeStage.headline}
-              fill
-              priority
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              className="object-contain object-center lg:object-right"
-            />
+          {FIVE_COURSES.map((course) => (
+            <div
+              key={course.code}
+              className="course-ledger-row bg-[var(--lt-surface)] px-6 py-5 md:px-12 md:py-6 grid grid-cols-1 lg:grid-cols-12 gap-4 items-baseline transition-colors hover:bg-[var(--lt-surface-2)]"
+            >
+              <div className="lg:col-span-3 flex items-baseline gap-3.5">
+                <span className="font-mono text-[11px] text-[var(--lt-gold)] tabular-nums">
+                  {course.code}
+                </span>
+                <h3 className="font-display text-[18.5px] font-medium tracking-[-0.024em] text-[var(--lt-ink)]">
+                  {course.name}
+                </h3>
+              </div>
+
+              <div className="lg:col-span-3">
+                <span className="block font-mono text-[9.5px] uppercase tracking-[0.12em] text-[var(--lt-quiet)] mb-1">
+                  Governing Statutes &amp; Rules
+                </span>
+                <p className="text-[13.5px] leading-[1.48] text-[var(--lt-muted)]">
+                  {course.statutes}
+                </p>
+              </div>
+
+              <div className="lg:col-span-3">
+                <span className="block font-mono text-[9.5px] uppercase tracking-[0.12em] text-[var(--lt-quiet)] mb-1">
+                  Audited Drafts &amp; Instruments
+                </span>
+                <p className="text-[13.5px] leading-[1.48] text-[var(--lt-muted)]">
+                  {course.processes}
+                </p>
+              </div>
+
+              <div className="lg:col-span-3 lg:text-right">
+                <span className="block font-mono text-[10px] uppercase tracking-[0.1em] text-[var(--lt-gold)] whitespace-nowrap">
+                  {course.sittings}
+                </span>
+                <span className="block font-mono text-[10.5px] text-[var(--lt-muted)] mt-1 whitespace-nowrap">
+                  {course.module}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* The Thirty-Day Plan Strip (Authentic .plan-strip from the learner shell) */}
+        <div className="bg-[var(--lt-surface)] border-x border-b border-[var(--lt-line)] px-6 py-8 md:px-12 md:py-11">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+            <div>
+              <p className="lt-kicker">Scheduled Revision</p>
+              <h3 className="font-display text-[22px] font-medium tracking-[-0.03em] text-[var(--lt-ink)]">
+                The thirty-day plan, built from your record
+              </h3>
+            </div>
+            <p className="font-mono text-[10.5px] uppercase tracking-[0.1em] text-[var(--lt-muted)] tabular-nums">
+              Day {selectedDay} of 30 · 11 completed in gold
+            </p>
+          </div>
+
+          <ol
+            ref={planStripRef}
+            className="plan-strip mb-7"
+            aria-label="Thirty-day revision strip"
+          >
+            {SAMPLE_PLAN_DAYS.map((d) => (
+              <li key={d.day}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedDay(d.day)}
+                  className="w-full p-0 bg-transparent border-0 cursor-pointer"
+                  aria-label={`Day ${d.day}`}
+                >
+                  <span
+                    className={`plan-strip-mark ${
+                      d.status === "done"
+                        ? "is-done"
+                        : d.status === "current"
+                        ? "is-current"
+                        : ""
+                    } ${
+                      selectedDay === d.day
+                        ? "shadow-[inset_0_-3px_0_var(--lt-ink)]"
+                        : ""
+                    }`}
+                  >
+                    {String(d.day).padStart(2, "0")}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ol>
+
+          {/* Selected Day Tasks on Ruled Hairlines */}
+          <div className="border-t border-[var(--lt-line)]">
+            {[
+              {
+                kind: "Paper",
+                title: `Day ${selectedDay} · Compulsory Question Part (2023 Q1)`,
+                sub: "Interlocutory injunction & undertaking as to damages in Lagos and Abuja.",
+                state: selectedDay < 12 ? "Completed" : "Open part",
+              },
+              {
+                kind: "Draft",
+                title: "Motion on Notice & Supporting Affidavit",
+                sub: "Compose the caption, relief, grounds, and NBA seal in Draft Lab.",
+                state: selectedDay < 12 ? "Completed" : "Open room",
+              },
+            ].map((task) => (
+              <div
+                key={task.kind}
+                className="grid grid-cols-[4.8rem_minmax(0,1fr)_auto] gap-4 items-center py-3.5 border-b border-[var(--lt-line)]"
+              >
+                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--lt-gold)]">
+                  {task.kind}
+                </span>
+                <div>
+                  <strong className="block font-display text-[15px] font-medium text-[var(--lt-ink)]">
+                    {task.title}
+                  </strong>
+                  <small className="block text-[13px] text-[var(--lt-muted)] mt-0.5">
+                    {task.sub}
+                  </small>
+                </div>
+                <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-[var(--lt-gold)]">
+                  {task.state}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

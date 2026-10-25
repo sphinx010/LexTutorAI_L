@@ -11,6 +11,28 @@ const config: Config = {
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        obsidian: {
+          DEFAULT: "#0A0B0E",
+          elevated: "#121318",
+          card: "#16181F",
+        },
+        paper: {
+          DEFAULT: "#F0F0ED",
+          elevated: "#FBFBF8",
+          ink: "#141518",
+          muted: "#5C5852",
+        },
+        gold: {
+          DEFAULT: "#D2B481",
+          deep: "#C5A880",
+          pale: "#E5D1AC",
+        },
+        signal: {
+          answer: "#C5A880",
+          trace: "#4A8B57",
+          build: "#C85A3C",
+          review: "#7388A0",
+        },
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
@@ -42,26 +64,17 @@ const config: Config = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        chart: {
-          "1": "hsl(var(--chart-1))",
-          "2": "hsl(var(--chart-2))",
-          "3": "hsl(var(--chart-3))",
-          "4": "hsl(var(--chart-4))",
-          "5": "hsl(var(--chart-5))",
-        },
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "sans-serif"],
-        heading: ["var(--font-heading)", "serif"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        heading: ["var(--font-display)", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "monospace"],
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-      },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },

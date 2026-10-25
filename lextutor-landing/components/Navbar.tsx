@@ -3,12 +3,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 
-const LIGHT_SECTION_IDS = new Set(["intelligence", "progress", "growth", "vision"]);
-const DARK_SECTION_IDS = new Set(["hero", "environment", "structure", "cta", "footer"]);
+const NAV_ITEMS = [
+  { label: "Premise", href: "#vision" },
+  { label: "Workspaces", href: "#environment" },
+  { label: "Topic Drilldown", href: "#telemetry" },
+  { label: "Architecture", href: "#intelligence" },
+  { label: "Courses", href: "#domains" },
+] as const;
 
 export default function Navbar() {
   const [isVisible, setIsVisible] = useState(true);
-  const [isDarkSection, setIsDarkSection] = useState(true);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [hasScrolled, setHasScrolled] = useState(false);
   const [isRopeActive, setIsRopeActive] = useState(false);
   const [animationFrameTime, setAnimationFrameTime] = useState(0);
@@ -29,6 +34,20 @@ export default function Navbar() {
   const navLinksRef = useRef<HTMLDivElement | null>(null);
   const navRowRef = useRef<HTMLDivElement | null>(null);
 
+  useEffect(() => {
+    const initial =
+      document.documentElement.getAttribute("data-theme") === "light"
+        ? "light"
+        : "dark";
+    setTheme(initial);
+  }, []);
+
+  const toggleTheme = (nextTheme?: "dark" | "light") => {
+    const resolved = nextTheme ?? (theme === "dark" ? "light" : "dark");
+    setTheme(resolved);
+    document.documentElement.setAttribute("data-theme", resolved);
+  };
+
   const clampPercent = (value: number) => Math.min(100, Math.max(0, value));
 
   const updateCenterFromElement = useCallback((element: HTMLElement) => {
@@ -38,7 +57,8 @@ export default function Navbar() {
     if (trackRect.width <= 0) return;
 
     const centerPercent =
-      ((targetRect.left + targetRect.width / 2 - trackRect.left) / trackRect.width) *
+      ((targetRect.left + targetRect.width / 2 - trackRect.left) /
+        trackRect.width) *
       100;
     targetCenterRef.current = clampPercent(centerPercent);
   }, []);
@@ -58,7 +78,9 @@ export default function Navbar() {
     if (navRowRef.current) {
       const navRect = navRowRef.current.getBoundingClientRect();
       const yRatio =
-        clampPercent(((navRect.bottom - event.clientY) / navRect.height) * 100) / 100;
+        clampPercent(
+          ((navRect.bottom - event.clientY) / navRect.height) * 100
+        ) / 100;
       targetPullRef.current = 3.4 + yRatio * 13.8;
     }
 
@@ -78,7 +100,9 @@ export default function Navbar() {
     const baseY = 14;
     const step = 1;
     const center = animatedCenterRef.current;
-    const now = animationFrameTime || performance.now();
+    const now =
+      animationFrameTime ||
+      (typeof performance !== "undefined" ? performance.now() : 0);
     const hoverPull = isRopeActive ? animatedPullRef.current : 0.95;
     const sigma = isRopeActive ? 7.8 : 40;
 
@@ -97,7 +121,9 @@ export default function Navbar() {
         const waveSpeed = 78;
         const front = waveSpeed * age;
         const frontDistance = Math.abs(distance - front);
-        const frontEnvelope = Math.exp(-(frontDistance * frontDistance) / (2 * 8.8 * 8.8));
+        const frontEnvelope = Math.exp(
+          -(frontDistance * frontDistance) / (2 * 8.8 * 8.8)
+        );
         const timeFalloff = Math.exp(-age * 1.55);
         const wavelength = 11.8;
         const k = (2 * Math.PI) / wavelength;
@@ -142,7 +168,7 @@ export default function Navbar() {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       const delta = currentScrollY - lastScrollYRef.current;
-      setHasScrolled(currentScrollY > 8);
+      setHasScrolled(currentScrollY > 18);
 
       if (currentScrollY <= threshold) {
         setIsVisible(true);
@@ -163,101 +189,13 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    let rafId: number | null = null;
-    const sections = Array.from(document.querySelectorAll<HTMLElement>("section[id], footer[id]"));
-    if (sections.length === 0) return;
-
-    const isSectionDark = (section: HTMLElement) => {
-      if (LIGHT_SECTION_IDS.has(section.id)) return false;
-      if (DARK_SECTION_IDS.has(section.id)) return true;
-
-      const color = window.getComputedStyle(section).backgroundColor;
-      const channels = color.match(/\d+(\.\d+)?/g);
-      if (!channels || channels.length < 3) return true;
-      const r = Number(channels[0]);
-      const g = Number(channels[1]);
-      const b = Number(channels[2]);
-      const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-      return luminance < 130;
-    };
-
-    const getSectionBounds = () => {
-      return sections
-        .map((section) => {
-          const rect = section.getBoundingClientRect();
-          const top = rect.top + window.scrollY;
-          const height = Math.max(rect.height, section.offsetHeight, 1);
-          return { section, top, bottom: top + height };
-        })
-        .sort((a, b) => a.top - b.top);
-    };
-
-    const detectThemeFromNavPosition = () => {
-      const sectionBounds = getSectionBounds();
-      if (sectionBounds.length === 0) return;
-      const navHeight = navRowRef.current?.getBoundingClientRect().height ?? 64;
-
-      // Expand the probe area if we are at the very bottom of the page
-      // so it successfully detects the footer which might not push high enough.
-      const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 10;
-      const probeDocY = isAtBottom ? document.documentElement.scrollHeight - 10 : window.scrollY + navHeight + 6;
-
-      const hero = document.getElementById("hero");
-      if (hero && !isAtBottom) {
-        const heroTop = hero.offsetTop;
-        const heroBottom = heroTop + Math.max(hero.offsetHeight, 1);
-        if (probeDocY < heroBottom - 2) {
-          setIsDarkSection(true);
-          return;
-        }
-      }
-
-      let active = sectionBounds[0];
-      for (const entry of sectionBounds) {
-        if (probeDocY >= entry.top) {
-          active = entry;
-        } else {
-          break;
-        }
-      }
-
-      setIsDarkSection(isSectionDark(active.section));
-    };
-
-    const scheduleThemeDetection = () => {
-      if (rafId !== null) return;
-      rafId = window.requestAnimationFrame(() => {
-        rafId = null;
-        detectThemeFromNavPosition();
-      });
-    };
-
-    const handleResize = () => {
-      scheduleThemeDetection();
-    };
-
-    detectThemeFromNavPosition();
-    window.addEventListener("load", scheduleThemeDetection);
-    window.addEventListener("scroll", scheduleThemeDetection, { passive: true });
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("load", scheduleThemeDetection);
-      window.removeEventListener("scroll", scheduleThemeDetection);
-      window.removeEventListener("resize", handleResize);
-      if (rafId !== null) {
-        window.cancelAnimationFrame(rafId);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     let isMounted = true;
     const animate = (timestamp: number) => {
       const current = animatedCenterRef.current;
       const target = targetCenterRef.current;
       const centerForce = (target - current) * 0.86;
-      centerVelocityRef.current = (centerVelocityRef.current + centerForce) * 0.56;
+      centerVelocityRef.current =
+        (centerVelocityRef.current + centerForce) * 0.56;
       animatedCenterRef.current = current + centerVelocityRef.current;
 
       const pullCurrent = animatedPullRef.current;
@@ -267,11 +205,12 @@ export default function Navbar() {
       animatedPullRef.current = pullCurrent + pullVelocityRef.current;
 
       ripplesRef.current = ripplesRef.current.filter(
-        (ripple) => timestamp - ripple.start < 1250,
+        (ripple) => timestamp - ripple.start < 1250
       );
 
       const hasMotion = Math.abs(animatedCenterRef.current - target) > 0.005;
-      const hasPullMotion = Math.abs(animatedPullRef.current - targetPullRef.current) > 0.01;
+      const hasPullMotion =
+        Math.abs(animatedPullRef.current - targetPullRef.current) > 0.01;
 
       if (
         isMounted &&
@@ -318,34 +257,22 @@ export default function Navbar() {
   }, []);
 
   const isHeroAtRest = !hasScrolled;
-  const useLightTheme = hasScrolled && !isDarkSection;
   const navBackgroundClass = isHeroAtRest
-    ? "bg-transparent border-b border-transparent"
-    : useLightTheme
-      ? "bg-white/72 backdrop-blur-xl border-b border-black/10"
-      : "bg-[#020300]/72 backdrop-blur-xl border-b border-white/10";
+    ? "bg-transparent"
+    : "bg-[var(--lt-surface)]/92 backdrop-blur-md";
 
-  const navTextClass = useLightTheme
-    ? "text-[0.95rem] font-semibold tracking-[-0.02em] text-black opacity-90 transition-opacity hover:opacity-70 focus:opacity-100"
-    : "text-[0.95rem] font-semibold tracking-[-0.02em] text-white opacity-90 transition-opacity hover:opacity-70 focus:opacity-100";
-
-  const signInClass = useLightTheme
-    ? "font-semibold tracking-[-0.02em] text-black opacity-90 transition-opacity hover:opacity-70"
-    : "font-semibold tracking-[-0.02em] text-white opacity-90 transition-opacity hover:opacity-70";
-
-  const ctaClass = useLightTheme
-    ? "border-black text-black hover:bg-black hover:text-white active:bg-black active:text-white"
-    : "group/cta border-white text-white hover:border-transparent active:border-transparent";
-
-  const lineStroke = useLightTheme ? "rgba(15,23,42,0.96)" : "rgba(255,255,255,0.94)";
+  const lineStroke =
+    theme === "light" ? "rgba(113, 83, 31, 0.58)" : "rgba(210, 180, 129, 0.65)";
 
   return (
-    <nav
-      className={`fixed left-0 right-0 top-0 z-50 font-sans transition-transform duration-300 ease-in-out py-3 md:py-0 ${navBackgroundClass} ${isVisible ? "translate-y-0" : "-translate-y-full"}`}
+    <header
+      className={`fixed left-0 right-0 top-0 z-50 font-sans transition-transform duration-300 ease-in-out py-2 md:py-0 ${navBackgroundClass} ${
+        isVisible ? "translate-y-0" : "-translate-y-full"
+      }`}
     >
       <div
         ref={navRowRef}
-        className="relative z-10 mx-auto flex w-full max-w-[1920px] items-center justify-between px-4 mt-2 md:mt-0 md:px-10 md:py-4 lg:px-16"
+        className="relative z-10 mx-auto flex w-full max-w-[1640px] items-center justify-between px-5 md:px-10 md:py-3.5 lg:px-14"
         onMouseMove={handleNavMouseMove}
         onMouseEnter={() => {
           targetPullRef.current = 8.2;
@@ -358,30 +285,34 @@ export default function Navbar() {
           setIsRopeActive(false);
         }}
       >
-        <a href="/" className="group flex items-center">
-          <div className="flex items-center">
+        {/* Brand Mark */}
+        <a href="#top" className="group flex items-center gap-3">
+          <div className="relative flex h-8 w-8 items-center justify-center border border-[var(--lt-line)] bg-[#141519] p-1.5 transition-colors group-hover:border-[var(--lt-gold)]">
             <Image
-              src="/images/whiteLogo.png"
-              alt="LexTutor"
-              width={67}
-              height={58}
+              src="/images/logo/LT_logo_type_1_white_L_gold_T.svg"
+              alt="LexTutor Monogram"
+              width={28}
+              height={28}
               priority
-              className={`relative z-0 h-9 w-9 object-contain transition-transform group-hover:scale-[1.04] md:h-12 md:w-12 ${useLightTheme ? "invert" : ""}`}
+              className="h-full w-full object-contain"
             />
-            <span
-              className={`relative z-10 -ml-1.5 md:-ml-2.5 text-lg font-bold tracking-[-0.03em] leading-none md:text-xl lg:text-3xl ${useLightTheme ? "text-[#0f172a]" : "text-white"}`}
-            >
-              LexTutor
-            </span>
           </div>
+          <span className="font-display text-[17px] font-medium tracking-[-0.025em] text-[var(--lt-ink)]">
+            Lex<span className="text-[var(--lt-gold)]">Tutor</span>
+          </span>
         </a>
 
-        <div ref={navLinksRef} className="hidden space-x-8 md:flex">
-          {["Environment", "Intelligence", "Growth", "Vision"].map((item, index) => (
+        {/* Center Navigation Links */}
+        <nav
+          ref={navLinksRef}
+          aria-label="Primary"
+          className="hidden items-center gap-7 lg:flex"
+        >
+          {NAV_ITEMS.map((item, index) => (
             <a
-              key={item}
-              href={`#${item.toLowerCase()}`}
-              className={`group relative ${navTextClass}`}
+              key={item.label}
+              href={item.href}
+              className="text-[13.5px] font-medium tracking-[-0.01em] text-[var(--lt-muted)] transition-colors hover:text-[var(--lt-ink)] focus:text-[var(--lt-ink)]"
               data-index={index}
               onFocus={handleLinkFocus}
               onBlur={() => {
@@ -396,49 +327,118 @@ export default function Navbar() {
                 setIsRopeActive(true);
               }}
             >
-              {item}
+              {item.label}
             </a>
           ))}
-        </div>
+        </nav>
 
-        <div className="flex items-center gap-4 md:gap-6">
-          <button className={`${signInClass} text-[13px] md:text-[0.95rem]`}>
-            Sign In
-          </button>
-          <button
-            className={`relative overflow-hidden rounded-md border px-4 py-2 text-[13px] font-semibold tracking-[-0.01em] md:px-6 md:py-2.5 md:text-[0.95rem] ${ctaClass}`}
+        {/* Right Controls: Authentic Appearance Switch (Light | Dark) + Square Desk Action */}
+        <div className="flex items-center gap-4 md:gap-5">
+          <div
+            role="group"
+            aria-label="Appearance"
+            className="inline-flex items-center gap-2 border border-[var(--lt-line)] bg-[var(--lt-surface)] px-2.5 py-1.5 text-[12px]"
           >
-            {!useLightTheme && <div className="iridescent-border" />}
-            <span className={!useLightTheme ? "relative z-10 transition-colors group-hover/cta:bg-gradient-to-r group-hover/cta:from-[#daafc3] group-hover/cta:to-[#62bfd0] group-hover/cta:bg-clip-text group-hover/cta:text-transparent group-active/cta:bg-gradient-to-r group-active/cta:from-[#daafc3] group-active/cta:to-[#62bfd0] group-active/cta:bg-clip-text group-active/cta:text-transparent" : "relative z-10 transition-colors"}>
-              Get Started
+            {theme === "dark" ? (
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                className="h-3.5 w-3.5 text-[var(--lt-gold)]"
+                aria-hidden="true"
+              >
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            ) : (
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                className="h-3.5 w-3.5 text-[var(--lt-gold)]"
+                aria-hidden="true"
+              >
+                <circle cx="12" cy="12" r="4.5" />
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+              </svg>
+            )}
+            <button
+              type="button"
+              onClick={() => toggleTheme("light")}
+              aria-pressed={theme === "light"}
+              className={`cursor-pointer transition-colors ${
+                theme === "light"
+                  ? "font-semibold text-[var(--lt-ink)]"
+                  : "text-[var(--lt-muted)] hover:text-[var(--lt-ink)]"
+              }`}
+            >
+              Light
+            </button>
+            <span className="text-[var(--lt-line)]" aria-hidden="true">
+              |
             </span>
-          </button>
+            <button
+              type="button"
+              onClick={() => toggleTheme("dark")}
+              aria-pressed={theme === "dark"}
+              className={`cursor-pointer transition-colors ${
+                theme === "dark"
+                  ? "font-semibold text-[var(--lt-ink)]"
+                  : "text-[var(--lt-muted)] hover:text-[var(--lt-ink)]"
+              }`}
+            >
+              Dark
+            </button>
+          </div>
+
+          <a
+            href="#cta"
+            className="hidden sm:inline-flex items-center gap-2.5 border border-[var(--lt-btn-border)] bg-[var(--lt-deck)] px-3.5 py-2 text-[13px] font-semibold text-[var(--lt-btn-ink)] transition-colors hover:border-[var(--lt-btn-hover-bg)] hover:bg-[var(--lt-btn-hover-bg)] hover:text-[var(--lt-btn-hover-ink)]"
+          >
+            <span>Get in touch</span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-3.5 w-3.5"
+              aria-hidden="true"
+            >
+              <path d="M4 12h15M13 6l6 6-6 6" />
+            </svg>
+          </a>
         </div>
       </div>
 
+      {/* Founder's Interactive Rope Rule */}
       <div className="relative z-20 w-screen left-1/2 -translate-x-1/2">
-        <div ref={lineTrackRef} className="relative mt-2 w-full overflow-visible md:mt-1">
-          {/* AI Boot Sequence Glows */}
-          <div className="animate-boot-left"></div>
-          <div className="animate-boot-right"></div>
-          <div className="animate-boot-flash"></div>
+        <div
+          ref={lineTrackRef}
+          className="relative mt-1 w-full overflow-visible md:mt-0"
+        >
+          <div className="animate-boot-left" />
+          <div className="animate-boot-right" />
+          <div className="animate-boot-flash" />
 
           <svg
             viewBox="-2 -8 104 36"
             preserveAspectRatio="none"
-            className="animate-boot-rope h-6 w-full overflow-visible md:h-8"
+            className="animate-boot-rope h-5 w-full overflow-visible md:h-6"
           >
             <path
               d={ropePath}
               fill="none"
               stroke={lineStroke}
-              strokeWidth="1.6"
+              strokeWidth="1.35"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
           </svg>
         </div>
       </div>
-    </nav>
+    </header>
   );
 }

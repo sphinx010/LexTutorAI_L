@@ -61,8 +61,8 @@ export default function DottedArrow({
             {gradient && (
                 <defs>
                     <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#daafc3" />
-                        <stop offset="100%" stopColor="#62bfd0" />
+                        <stop offset="0%" stopColor="#F2EFE9" />
+                        <stop offset="100%" stopColor="#D2B481" />
                     </linearGradient>
                 </defs>
             )}
