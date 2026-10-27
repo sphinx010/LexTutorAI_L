@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LexTutor palette samples</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&family=Tinos:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { background: #0b0b0c; color: #eee; font-family: "Source Sans 3", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .intro { padding: 40px clamp(16px, 4vw, 56px) 24px; font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: #8d8d8d; }
+  .intro b { color: #eee; font-weight: 500; }
+
+  .sample { scroll-margin-top: 44px; position: relative; overflow: hidden; background: var(--bg); color: var(--ink); border-top: 1px solid rgba(255,255,255,.06); }
+  .sample::before { /* visible column grid */
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: repeating-linear-gradient(90deg, var(--rule) 0 1px, transparent 1px calc((100% - 0px) / 12));
+    opacity: .55;
+  }
+  .grain::after {
+    content: ""; position: absolute; inset: -50%; pointer-events: none; opacity: .14; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  .wrap { position: relative; z-index: 1; max-width: 1440px; margin: 0 auto; padding: clamp(40px, 6vw, 88px) clamp(16px, 4vw, 56px); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(28px, 4vw, 64px); align-items: end; }
+  .tag { display: flex; justify-content: space-between; gap: 16px; font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: clamp(28px, 4vw, 48px); grid-column: 1 / -1; }
+  .tag b { color: var(--ink); font-weight: 500; }
+  h2 { font-family: "Instrument Sans", sans-serif; font-weight: 500; font-size: clamp(44px, 6.2vw, 104px); line-height: .95; letter-spacing: -.045em; text-wrap: balance; }
+  h2 em { font-style: normal; color: var(--accent-ink, var(--accent)); }
+  .lede { margin-top: 28px; max-width: 34ch; font-size: 19px; line-height: 1.5; color: var(--muted); }
+  .actions { margin-top: 32px; display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+
+  /* Button: label rolls to its twin, arrow leaves and returns, spring press */
+  .btn { --h: 52px; display: inline-flex; align-items: center; gap: 14px; height: var(--h); padding: 0 8px 0 22px; background: var(--btn); color: var(--btn-ink); text-decoration: none; font-family: "Instrument Sans", sans-serif; font-weight: 500; font-size: 16px; letter-spacing: -.01em; border-radius: 2px; transition: transform .45s cubic-bezier(.34,1.56,.64,1); }
+  .btn .roll { display: grid; height: 1.2em; overflow: hidden; line-height: 1.2; }
+  .btn .roll span { grid-area: 1/1; transition: transform .5s cubic-bezier(.7,0,.2,1); }
+  .btn .roll span + span { transform: translateY(110%); }
+  .btn:hover .roll span:first-child { transform: translateY(-110%); }
+  .btn:hover .roll span + span { transform: translateY(0); }
+  .btn .chip { position: relative; width: 36px; height: 36px; display: grid; place-items: center; overflow: hidden; background: var(--chip); color: var(--chip-ink); border-radius: 1px; }
+  .btn .chip svg { position: absolute; width: 16px; height: 16px; transition: transform .5s cubic-bezier(.7,0,.2,1); }
+  .btn .chip svg + svg { transform: translateX(-160%); }
+  .btn:hover .chip svg:first-child { transform: translateX(160%); }
+  .btn:hover .chip svg + svg { transform: translateX(0); }
+  .btn:active { transform: scale(.96); }
+  .tlink { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); text-decoration: none; font-family: "Instrument Sans", sans-serif; font-size: 16px; position: relative; padding: 4px 0; }
+  .tlink::after { content: ""; position: absolute; left: 0; right: 24px; bottom: 0; height: 1px; background: currentColor; transform-origin: right; transition: transform .5s cubic-bezier(.7,0,.2,1); }
+  .tlink:hover::after { transform: scaleX(0); }
+  .tlink svg { width: 14px; height: 14px; transition: transform .4s cubic-bezier(.34,1.56,.64,1); }
+  .tlink:hover svg { transform: translateX(4px); }
+
+  /* Product card: a redline + Lexa note */
+  .card { background: var(--card); color: var(--card-ink); border: 1px solid var(--card-rule); border-radius: 3px; padding: 26px 28px 24px; }
+  .card .bar { display: flex; justify-content: space-between; font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--card-muted); padding-bottom: 12px; border-bottom: 1px solid var(--card-rule); margin-bottom: 18px; }
+  .card .bar b { color: var(--voice); font-weight: 500; }
+  .doc { font-family: "Tinos", "Times New Roman", serif; font-size: 15px; line-height: 1.6; }
+  .doc del { text-decoration: line-through; text-decoration-color: var(--strike); text-decoration-thickness: 1.5px; color: var(--card-muted); }
+  .doc ins { text-decoration: none; color: var(--voice); }
+  .doc sup { font-family: "IBM Plex Mono", monospace; font-size: 10px; color: var(--voice); margin-left: 3px; }
+  .note { margin-top: 18px; padding-left: 14px; border-left: 2px solid var(--voice); }
+  .note p:first-child { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--voice); }
+  .note p + p { margin-top: 4px; font-size: 14.5px; line-height: 1.45; color: var(--card-ink); }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .stat { background: var(--card); border: 1px solid var(--card-rule); border-radius: 3px; padding: 18px 20px 16px; color: var(--card-ink); }
+  .stat b { display: block; font-family: "Instrument Sans", sans-serif; font-weight: 500; font-size: 44px; letter-spacing: -.04em; line-height: 1; color: var(--stat, var(--card-ink)); }
+  .stat span { display: block; margin-top: 10px; font-size: 13.5px; color: var(--card-muted); }
+
+  .chapters { grid-column: 1 / -1; display: flex; gap: 6px; margin-top: clamp(28px, 4vw, 48px); align-items: stretch; }
+  .chapters div { flex: 1; height: 54px; border-radius: 2px; border: 1px solid rgba(127,127,127,.25); font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; padding: 8px 10px; display: flex; align-items: flex-end; }
+  .swatches { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 18px; font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--muted); }
+  .swatches i { display: inline-block; width: 14px; height: 14px; vertical-align: -3px; margin-right: 6px; border: 1px solid rgba(127,127,127,.4); }
+
+  @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; align-items: start; } }
+
+  /* Phone: a hand-held page, not the desk squeezed */
+  @media (max-width: 600px) {
+    .intro { padding: 28px 16px 16px; font-size: 10.5px; line-height: 1.6; letter-spacing: .12em; }
+    .jump { padding: 0 16px; }
+    .sample::before { background-image: repeating-linear-gradient(90deg, var(--rule) 0 1px, transparent 1px calc(100% / 4)); }
+    .wrap { padding: 44px 16px 40px; gap: 28px; }
+    .tag { flex-direction: column; gap: 4px; font-size: 10.5px; letter-spacing: .12em; line-height: 1.5; margin-bottom: 4px; }
+    h2 { font-size: clamp(36px, 11.2vw, 50px); line-height: .98; letter-spacing: -.04em; }
+    .lede { margin-top: 18px; font-size: 16.5px; }
+    .actions { margin-top: 24px; gap: 22px; }
+    .btn { --h: 48px; padding: 0 6px 0 18px; font-size: 15.5px; }
+    .btn .chip { width: 34px; height: 34px; }
+    .card { padding: 18px 18px 18px; }
+    .card .bar { font-size: 10px; letter-spacing: .1em; gap: 12px; }
+    .doc { font-size: 14px; }
+    .note p + p { font-size: 14px; }
+    .stats { gap: 8px; margin-top: 8px; }
+    .stat { padding: 14px 14px 12px; }
+    .stat b { font-size: 32px; }
+    .stat span { font-size: 12.5px; margin-top: 8px; }
+    .chapters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 4px; }
+    .chapters div { height: 46px; font-size: 9.5px; letter-spacing: .08em; padding: 6px 8px; }
+    .swatches { gap: 8px 16px; font-size: 10.5px; }
+  }
+
+  @media (max-width: 380px) { .card .bar { flex-direction: column; gap: 4px; } .card .bar b { white-space: nowrap; } }
+
+  /* Touch has no hover: a press shows the same roll */
+  @media (hover: none) {
+    .btn:active .roll span:first-child { transform: translateY(-110%); }
+    .btn:active .roll span + span { transform: translateY(0); }
+    .btn:active .chip svg:first-child { transform: translateX(160%); }
+    .btn:active .chip svg + svg { transform: translateX(0); }
+  }
+
+  /* Jump between samples */
+  .jump { position: sticky; top: 0; z-index: 5; display: flex; gap: 6px; padding: 0 clamp(16px, 4vw, 56px); background: rgba(11,11,12,.86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,.08); overflow-x: auto; scrollbar-width: none; }
+  .jump a { flex: 0 0 auto; padding: 14px 10px 12px; font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #9a9a9a; text-decoration: none; border-bottom: 1px solid transparent; }
+  .jump a:hover, .jump a:focus-visible { color: #fff; border-bottom-color: #fff; outline: none; }
+  @media (prefers-reduced-motion: reduce) { .btn, .btn * , .tlink * , .tlink::after { transition: none !important; } }
+</style>
+</head>
+<body>
+<p class="intro"><b>LexTutor · palette samples</b> · same layout, five palettes · hover or press the buttons</p>
+<nav class="jump" aria-label="Samples"><a href="#a">A · Correction</a><a href="#b">B · Cobalt</a><a href="#c">C · Green</a><a href="#d">D · Ember</a><a href="#e">E · Oxblood</a></nav>
+
+<svg width="0" height="0" style="position:absolute"><symbol id="arr" viewBox="0 0 16 16"><path d="M3 8h9.5M8.5 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></symbol></svg>
+
+<template id="body">
+  <div>
+    <h2>Legal work, checked against <em>the law it answers&nbsp;to.</em></h2>
+    <p class="lede">LexTutor audits legal drafts and procedural matters against the rules and authorities that govern them.</p>
+    <div class="actions">
+      <a class="btn" href="#"><span class="roll"><span>Request access</span><span aria-hidden="true">Request access</span></span><span class="chip"><svg><use href="#arr"/></svg><svg><use href="#arr"/></svg></span></a>
+      <a class="tlink" href="#"><span>See the workspaces</span><svg><use href="#arr"/></svg></a>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <div class="bar"><span>Draft Lab · Motion on notice</span><b>1 correction</b></div>
+      <p class="doc">BROUGHT <del>pursuant to the inherent jurisdiction of this Court only</del> <ins>PURSUANT TO ORDER 43 RULE 1 OF THE HIGH COURT OF LAGOS STATE (CIVIL PROCEDURE) RULES 2019</ins><sup>1</sup></p>
+      <div class="note"><p>1 · Order 43 Rule 1(1), Lagos 2019</p><p>A motion must state the Rule of Court or Law under which it is brought.</p></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>43</b><span>Court processes in Draft Lab</span></div>
+      <div class="stat"><b>15/18</b><span>Sittings set Interlocutory Applications</span></div>
+    </div>
+  </div>
+</template>
+
+<!-- A · Correction colours -->
+<section id="a" class="sample" style="--bg:#F3F1EC;--ink:#0E1116;--muted:#5A5C63;--rule:rgba(14,17,22,.07);--accent:#2F4BFF;--btn:#E5482E;--btn-ink:#fff;--chip:#0E1116;--chip-ink:#fff;--card:#fff;--card-ink:#0E1116;--card-muted:#6B6E76;--card-rule:#E2DFD8;--strike:#E5482E;--voice:#2F4BFF;--stat:#E5482E">
+  <div class="wrap" data-slot>
+    <p class="tag"><span><b>A · Correction colours</b> · the colours of a marked-up document</span><span>recommended</span></p>
+  </div>
+</section>
+<section class="sample" style="--bg:#2F4BFF;--ink:#F3F1EC;--muted:rgba(243,241,236,.78);--rule:rgba(255,255,255,.12);--accent:#F3F1EC;--accent-ink:#0E1116;--btn:#F3F1EC;--btn-ink:#0E1116;--chip:#E5482E;--chip-ink:#fff;--card:#F3F1EC;--card-ink:#0E1116;--card-muted:#6B6E76;--card-rule:#DAD7CF;--strike:#E5482E;--voice:#2F4BFF;--stat:#2F4BFF">
+  <div class="wrap" data-slot>
+    <p class="tag"><span><b>A · Correction colours</b> · its cobalt chapter (engine section)</span><span></span></p>
+  </div>
+</section>
+<section class="sample" style="--bg:#0E1116;--ink:#F3F1EC;--muted:#A3A6AE;--rule:rgba(255,255,255,.05);--accent:#FF6A4D;--btn:#E5482E;--btn-ink:#fff;--chip:#F3F1EC;--chip-ink:#0E1116;--card:#161A21;--card-ink:#F3F1EC;--card-muted:#8A8E97;--card-rule:#262B34;--strike:#FF6A4D;--voice:#7D90FF;--stat:#FF6A4D">
+  <div class="wrap" data-slot>
+    <p class="tag"><span><b>A · Correction colours</b> · its ink chapter (workspaces section)</span><span></span></p>
+    <div class="chapters">
+      <div style="background:#F3F1EC;color:#0E1116">Hero · paper</div>
+      <div style="background:#F3F1EC;color:#0E1116">Premise · paper</div>
+      <div style="background:#0E1116;color:#F3F1EC">Workspaces · ink</div>
+      <div style="background:#2F4BFF;color:#F3F1EC">Engine · cobalt</div>
+      <div style="background:#F3F1EC;color:#0E1116">Courses · paper</div>
+      <div style="background:#E5482E;color:#fff">Founder · redline</div>
+    </div>
+    <p class="swatches"><span><i style="background:#F3F1EC"></i>paper #F3F1EC</span><span><i style="background:#0E1116"></i>ink #0E1116</span><span><i style="background:#E5482E"></i>redline #E5482E</span><span><i style="background:#2F4BFF"></i>cobalt #2F4BFF</span></p>
+  </div>
+</section>
+
+<!-- B · Cobalt chapters -->
+<section id="b" class="sample" style="--bg:#2B50E8;--ink:#F4F2EE;--muted:rgba(244,242,238,.8);--rule:rgba(255,255,255,.14);--accent:#C8F169;--btn:#C8F169;--btn-ink:#0B1B33;--chip:#0B1B33;--chip-ink:#C8F169;--card:#0B1B33;--card-ink:#F4F2EE;--card-muted:#93A0B8;--card-rule:#1D3152;--strike:#FF7A6B;--voice:#C8F169;--stat:#C8F169">
+  <div class="wrap" data-slot>
+    <p class="tag"><span><b>B · Cobalt chapters</b> · bold, tech-forward (sebg)</span><span></span></p>
+    <div class="chapters">
+      <div style="background:#2B50E8;color:#F4F2EE">Hero · cobalt</div>
+      <div style="background:#F4F2EE;color:#0B1B33">Premise · paper</div>
+      <div style="background:#0B1B33;color:#F4F2EE">Workspaces · navy</div>
+      <div style="background:#F4F2EE;color:#0B1B33">Engine · paper</div>
+      <div style="background:#C8F169;color:#0B1B33">Courses · lime</div>
+      <div style="background:#2B50E8;color:#F4F2EE">Founder · cobalt</div>
+    </div>
+    <p class="swatches" style="--muted:rgba(244,242,238,.85)"><span><i style="background:#2B50E8"></i>cobalt #2B50E8</span><span><i style="background:#0B1B33"></i>navy #0B1B33</span><span><i style="background:#F4F2EE"></i>paper #F4F2EE</span><span><i style="background:#C8F169"></i>lime #C8F169</span></p>
+  </div>
+</section>
+
+<!-- C · Racing green -->
+<section id="c" class="sample" style="--bg:#0D2B24;--ink:#F2F0EA;--muted:#A9C2B8;--rule:rgba(168,240,198,.07);--accent:#A8F0C6;--btn:#A8F0C6;--btn-ink:#0D2B24;--chip:#0D2B24;--chip-ink:#A8F0C6;--card:#123A31;--card-ink:#F2F0EA;--card-muted:#8FB0A4;--card-rule:#1E4B40;--strike:#FF8A73;--voice:#A8F0C6;--stat:#A8F0C6">
+  <div class="wrap" data-slot>
+    <p class="tag"><span><b>C · Racing green</b> · calm, premium (Leome)</span><span></span></p>
+    <p class="swatches"><span><i style="background:#0D2B24"></i>green #0D2B24</span><span><i style="background:#A8F0C6"></i>mint #A8F0C6</span><span><i style="background:#F2F0EA"></i>paper #F2F0EA</span></p>
+  </div>
+</section>
+
+<!-- D · Ember (from the agency reference) -->
+<section id="d" class="sample grain" style="--bg:radial-gradient(120% 90% at 70% 0%, #F08A45 0%, #C6531F 38%, #5A1E0A 78%, #2A0E05 100%);--ink:#FFF4EA;--muted:rgba(255,244,234,.82);--rule:rgba(255,255,255,.08);--accent:#FFF4EA;--btn:#140804;--btn-ink:#FFF4EA;--chip:#FFF4EA;--chip-ink:#140804;--card:rgba(40,14,5,.55);--card-ink:#FFF4EA;--card-muted:rgba(255,236,220,.7);--card-rule:rgba(255,255,255,.14);--strike:#FFB199;--voice:#FFD7A8;--stat:#FFF4EA">
+  <div class="wrap" data-slot>
+    <p class="tag"><span><b>D · Ember</b> · warm gradient and grain (your agency reference)</span><span></span></p>
+    <p class="swatches"><span><i style="background:#F08A45"></i>#F08A45</span><span><i style="background:#C6531F"></i>#C6531F</span><span><i style="background:#2A0E05"></i>#2A0E05</span><span><i style="background:#FFF4EA"></i>#FFF4EA</span></p>
+  </div>
+</section>
+
+<!-- E · Oxblood and bone -->
+<section id="e" class="sample" style="--bg:#EFE8DC;--ink:#2A0B10;--muted:#6E5A55;--rule:rgba(42,11,16,.07);--accent:#7A1622;--btn:#7A1622;--btn-ink:#F7F1E6;--chip:#2A0B10;--chip-ink:#F7F1E6;--card:#2A0B10;--card-ink:#F7F1E6;--card-muted:#C2A9A4;--card-rule:#47202A;--strike:#FF8E7F;--voice:#F2C46D;--stat:#F2C46D">
+  <div class="wrap" data-slot>
+    <p class="tag"><span><b>E · Oxblood and bone</b> · warm, literary, serious</span><span></span></p>
+    <p class="swatches"><span><i style="background:#EFE8DC"></i>bone #EFE8DC</span><span><i style="background:#7A1622"></i>oxblood #7A1622</span><span><i style="background:#2A0B10"></i>deep #2A0B10</span><span><i style="background:#F2C46D"></i>brass #F2C46D</span></p>
+  </div>
+</section>
+
+<script>
+  // Put the shared hero + card into every sample, after its tag.
+  const tpl = document.getElementById("body");
+  document.querySelectorAll("[data-slot]").forEach((slot) => {
+    const tag = slot.querySelector(".tag");
+    tag.after(tpl.content.cloneNode(true));
+  });
+</script>
+</body>
+</html>
