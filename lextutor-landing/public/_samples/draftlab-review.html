@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Draft Lab review, redesigned</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&family=Tinos:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  /* The app's own tokens: black and gold in the dark, bone and oxblood in the light. One signal colour each. */
+  :root, :root[data-theme="dark"] {
+    --page:#0f1014; --sheet:#15161b; --ink:#f1f0ed; --muted:#aaa9ad; --quiet:#828187; --line:#2b2b31; --hair:#22232a;
+    --signal:#d2b481; --signal-soft:rgba(210,180,129,.14); --btn:#f1f0ed; --btn-ink:#0f1014;
+  }
+  :root[data-theme="light"] {
+    --page:#efe8dc; --sheet:#f8f3ea; --ink:#2a0b10; --muted:#5e4a45; --quiet:#6c5752; --line:#d2c5b2; --hair:#e2d8c8;
+    --signal:#7a1622; --signal-soft:rgba(122,22,34,.09); --btn:#2a0b10; --btn-ink:#f8f3ea;
+  }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--page); color:var(--ink); font-family:"Source Sans 3",system-ui,sans-serif; -webkit-font-smoothing:antialiased; transition:background-color .3s ease; }
+  .mono { font-family:"IBM Plex Mono",monospace; }
+  .wrap { max-width:1240px; margin:0 auto; padding:0 clamp(16px,4vw,56px); }
+
+  .sample-bar { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:12px clamp(16px,4vw,56px); border-bottom:1px solid var(--line); font:500 10.5px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); }
+  .tabs { display:flex; gap:18px; }
+  .tabs button { background:none; border:0; padding:6px 0; font:inherit; letter-spacing:inherit; text-transform:inherit; color:var(--quiet); cursor:pointer; }
+  .tabs button[aria-pressed="true"] { color:var(--ink); box-shadow:inset 0 -1px 0 var(--signal); }
+
+  /* Header: title, readiness, Lexa's remark */
+  header.head { padding:clamp(36px,5vw,64px) 0 0; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px 40px; align-items:end; }
+  .back { grid-column:1 / -1; display:inline-flex; align-items:center; gap:8px; color:var(--quiet); font:500 10.5px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; text-decoration:none; }
+  .back:hover { color:var(--ink); }
+  h1 { font-family:"Instrument Sans",sans-serif; font-weight:500; font-size:clamp(34px,4vw,52px); line-height:1; letter-spacing:-.035em; }
+  .sub { margin-top:10px; font-size:15px; color:var(--quiet); }
+  .ladder { display:flex; gap:0; list-style:none; padding:0; border-bottom:1px solid var(--line); }
+  .ladder li { padding:0 0 10px; margin-left:22px; font:500 10.5px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); }
+  .ladder li.is-current { color:var(--ink); box-shadow:inset 0 -1px 0 var(--signal), 0 1px 0 var(--signal); }
+  .remark { grid-column:1 / -1; margin-top:clamp(28px,3.4vw,44px); display:grid; grid-template-columns:120px minmax(0,1fr); gap:0 24px; padding-top:22px; border-top:1px solid var(--line); }
+  .remark .label { font:500 10.5px/2 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); }
+  .remark p { max-width:62ch; font-family:"Instrument Sans",sans-serif; font-size:clamp(19px,1.6vw,23px); line-height:1.42; letter-spacing:-.012em; }
+
+  /* Toolbar */
+  .tools { margin-top:28px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px 28px; padding:14px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+  .tally { display:flex; gap:22px; font:500 11px/1 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--quiet); }
+  .tally b { color:var(--ink); font-weight:500; margin-right:6px; }
+  .tally .act b { color:var(--signal); }
+  .views { display:flex; align-items:center; gap:22px; }
+  .switch { display:inline-flex; align-items:center; gap:10px; font:500 10.5px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); cursor:pointer; background:none; border:0; padding:0; }
+  .switch i { position:relative; width:26px; height:14px; border:1px solid var(--line); border-radius:999px; transition:border-color .2s; }
+  .switch i::after { content:""; position:absolute; top:2px; left:2px; width:8px; height:8px; border-radius:50%; background:var(--quiet); transition:transform .3s cubic-bezier(.34,1.56,.64,1), background-color .2s; }
+  .switch[aria-pressed="true"] { color:var(--ink); }
+  .switch[aria-pressed="true"] i { border-color:var(--signal); }
+  .switch[aria-pressed="true"] i::after { transform:translateX(12px); background:var(--signal); }
+  .quiet-acts { display:flex; gap:20px; }
+  .quiet-acts button { background:none; border:0; padding:0; color:var(--quiet); font:500 10.5px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; cursor:pointer; }
+  .quiet-acts button:hover { color:var(--ink); }
+
+  /* Body: the document and the notes */
+  .body { display:grid; grid-template-columns:minmax(0,7fr) minmax(0,4fr); gap:clamp(48px,7vw,104px); padding:clamp(28px,3vw,40px) 0 40px; align-items:start; }
+  .sheet { background:var(--sheet); border:1px solid var(--line); padding:clamp(28px,4vw,56px) clamp(24px,4.4vw,64px); font-family:"Tinos","Times New Roman",serif; font-size:15.5px; line-height:1.7; color:var(--ink); }
+  .sheet .c { text-align:center; font-weight:700; text-transform:uppercase; line-height:1.5; }
+  .sheet .r { text-align:right; text-transform:uppercase; margin:14px 0; }
+  .sheet .party { display:flex; justify-content:space-between; text-transform:uppercase; }
+  .sheet .t { margin:22px 0 16px; text-align:center; font-weight:700; text-decoration:underline; text-underline-offset:.25em; text-transform:uppercase; }
+  .sheet p { margin:0 0 14px; }
+  .sheet .gap { margin:16px 0; padding:10px 12px; border:1px dashed var(--line); font:500 10.5px/1.4 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--quiet); }
+  .sheet .sign { margin-top:24px; line-height:1.55; }
+  sup.n { font:600 10px "IBM Plex Mono",monospace; margin-left:3px; color:var(--quiet); }
+  sup.n.act { color:var(--signal); }
+  /* Changes: one colour. Struck words go quiet under a signal line; the words put in stand in the signal colour. */
+  del.was { --strike:1; text-decoration:none; color:color-mix(in srgb, var(--quiet) calc(var(--strike)*100%), var(--ink)); background-image:linear-gradient(var(--signal),var(--signal)); background-repeat:no-repeat; background-position:0 58%; background-size:calc(var(--strike)*100%) 1px; }
+  ins.now { --in:1; text-decoration:none; color:var(--signal); opacity:var(--in); }
+  ins.now.is-wait { display:none; }
+  .clean del.was { display:none; }
+  .clean ins.now { color:var(--ink); }
+  .clean sup.n { display:none; }
+  .original ins.now { display:none; }
+  .original del.was { color:var(--ink); background-size:0 1px; }
+  /* A point to strengthen: a quiet dotted rule, no colour. */
+  .dev { text-decoration:underline dotted; text-decoration-color:var(--quiet); text-underline-offset:.32em; }
+  .clean .dev { text-decoration:none; }
+  .lit { background:var(--signal-soft); box-shadow:0 0 0 3px var(--signal-soft); transition:background-color .2s, box-shadow .2s; }
+
+  /* Margin notes: each note stands level with the words it answers; leaders run straight, or turn square in the gutter. */
+  .body { position:relative; }
+  .notes { position:relative; }
+  .notes.placed .note { position:absolute; left:0; right:0; }
+  .notes.placed .praise { position:absolute; left:0; right:0; }
+  .leaders { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
+  .leaders path { fill:none; stroke:var(--line); stroke-width:1; transition:stroke .2s ease; }
+  .leaders circle { fill:var(--line); transition:fill .2s ease; }
+  .leaders .is-act path, .leaders .is-on path { stroke:var(--signal); }
+  .leaders .is-act circle, .leaders .is-on circle { fill:var(--signal); }
+  .leaders g:not(.is-act):not(.is-on) path { stroke-dasharray:2 3; }
+  .notes h2 { font:500 10.5px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); padding-bottom:14px; border-bottom:1px solid var(--line); }
+  .note { display:grid; grid-template-columns:30px minmax(0,1fr); gap:0 10px; padding:18px 0; border-bottom:1px solid var(--line); cursor:default; }
+  .note .num { font:500 12px/1.6 "IBM Plex Mono",monospace; color:var(--quiet); }
+  .note.act .num { color:var(--signal); }
+  .note .kind { font:500 10.5px/1.6 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); }
+  .note p { grid-column:2; margin-top:6px; font-family:"Geist",sans-serif; font-size:14.5px; line-height:1.55; color:var(--ink); }
+  .note .more { grid-column:2; margin-top:10px; justify-self:start; background:none; border:0; padding:0 0 2px; color:var(--quiet); font:500 10.5px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; border-bottom:1px dotted var(--quiet); cursor:pointer; }
+  .note .more:hover { color:var(--ink); }
+  .note .full { grid-column:2; display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-family:"Tinos",serif; font-size:14px; line-height:1.6; color:var(--muted); }
+  .note.open .full { display:block; }
+  .praise { margin-top:18px; }
+  .praise > button { display:flex; width:100%; justify-content:space-between; align-items:center; background:none; border:0; padding:0; color:var(--quiet); font:500 10.5px/1.6 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; cursor:pointer; text-align:left; }
+  .praise > button:hover { color:var(--ink); }
+  .praise > button span:last-child { transition:transform .3s ease; }
+  .praise.open > button span:last-child { transform:rotate(90deg); }
+  .praise ul { display:none; list-style:none; padding:10px 0 0; }
+  .praise.open ul { display:block; }
+  .praise li { padding:8px 0; border-top:1px solid var(--hair); font-family:"Geist",sans-serif; font-size:13.5px; line-height:1.5; color:var(--muted); }
+  .praise li b { display:block; font:500 10px/1.6 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--quiet); }
+
+  /* Footer: the way back, a dotted link, one primary action */
+  .foot { display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; padding:24px 0 80px; border-top:1px solid var(--line); }
+  .foot .left { display:flex; align-items:center; gap:28px; }
+  .chev { display:inline-flex; align-items:center; gap:8px; color:var(--muted); text-decoration:none; font-family:"Instrument Sans",sans-serif; font-size:15px; }
+  .chev:hover { color:var(--ink); }
+  .dotted { color:var(--ink); font-family:"Instrument Sans",sans-serif; font-size:15px; text-decoration:underline dotted var(--signal); text-underline-offset:.3em; }
+  .press { display:inline-flex; align-items:center; gap:14px; height:46px; padding:0 6px 0 18px; border:1px solid var(--signal); background:transparent; color:var(--ink); font:500 11px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; text-decoration:none; cursor:pointer; transition:transform .45s cubic-bezier(.34,1.56,.64,1); }
+  .press .roll { display:grid; height:1.3em; overflow:hidden; line-height:1.3; }
+  .press .roll span { grid-area:1/1; transition:transform .5s cubic-bezier(.7,0,.2,1); }
+  .press .roll span + span { transform:translateY(115%); }
+  .press .chip { position:relative; width:34px; height:34px; display:grid; place-items:center; overflow:hidden; background:var(--signal); color:var(--page); }
+  .press .chip svg { position:absolute; width:15px; height:15px; transition:transform .5s cubic-bezier(.7,0,.2,1); }
+  .press .chip svg + svg { transform:translateX(-170%); }
+  @media (hover:hover) {
+    .press:hover .roll span:first-child { transform:translateY(-115%); }
+    .press:hover .roll span + span { transform:translateY(0); }
+    .press:hover .chip svg:first-child { transform:translateX(170%); }
+    .press:hover .chip svg + svg { transform:translateX(0); }
+  }
+  .press:active { transform:scale(.96); }
+
+  /* On the phone each correction is tucked in under the part it corrects, a short hairline dropping from the words
+     to the note: only notes that ask for action, one per part, after the part, never between its lines. */
+  .tuck { position:relative; margin:4px 0 20px; padding:12px 0 0; border-top:1px solid var(--line); font-family:"Geist",sans-serif; }
+  .tuck::before { content:""; position:absolute; left:0; top:-10px; width:1px; height:10px; background:var(--line); }
+  .tuck.act::before { background:var(--signal); }
+  .tuck .kind { display:block; font:500 10px/1.6 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); }
+  .tuck .kind b { font-weight:500; color:var(--quiet); margin-right:8px; }
+  .tuck.act .kind b { color:var(--signal); }
+  .tuck p { margin:6px 0 0; font-size:14.5px; line-height:1.55; color:var(--ink); text-align:left; }
+  .tuck .more { margin-top:8px; background:none; border:0; padding:0 0 2px; color:var(--quiet); font:500 10px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; border-bottom:1px dotted var(--quiet); }
+  .tuck .full { display:none; margin-top:8px; font-family:"Tinos",serif; font-size:14px; line-height:1.6; color:var(--muted); }
+  .tuck.open .full { display:block; }
+  /* The correction carries the signal: its rule, number and label; strengthen notes stay quiet. */
+  .tuck.act { border-top-color:var(--signal); }
+  .tuck.act .kind { color:var(--signal); }
+  /* The once-only hint as a correction comes into view: the hairline drops from the words, a light runs the rule,
+     the number pings. Brief, then still (principle 14). */
+  .tuck::before { transform-origin:top; }
+  .tuck .run { position:absolute; left:0; right:0; top:-1px; height:1px; overflow:hidden; pointer-events:none; }
+  .tuck .run i { position:absolute; top:0; left:-35%; width:35%; height:1px; background:linear-gradient(90deg, transparent, var(--signal), transparent); opacity:0; }
+  .tuck .kind b { display:inline-block; }
+  .tuck.act.armed::before { transform:scaleY(0); }
+  .tuck.act.seen::before { transform:scaleY(1); transition:transform .45s cubic-bezier(.2,.7,.2,1); }
+  .tuck.act.seen .run i { animation:dl-run 1.1s cubic-bezier(.45,.05,.35,1) .25s 1 both; }
+  .tuck.act.seen .kind b { animation:dl-ping .7s cubic-bezier(.34,1.56,.64,1) .2s 1; }
+  @keyframes dl-run { 0% { left:-35%; opacity:1; } 85% { opacity:1; } 100% { left:100%; opacity:0; } }
+  @keyframes dl-ping { 0%,100% { transform:scale(1); } 45% { transform:scale(1.35); } }
+  /* On the phone the corrected words keep a faint signal rule in the clean page, so the eye finds where. */
+  .sheet.has-tucks.clean [data-n] ins.now { text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:.3em; text-decoration-color:color-mix(in srgb, var(--signal) 32%, transparent); }
+  .sheet.has-tucks.clean sup.n { display:inline; }
+  /* Where to look, said once under Lexa's remark, with the way straight to it. */
+  .lookout { display:none; }
+  @media (max-width:900px) {
+    .lookout { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px 16px; margin-top:20px; padding:14px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+    .lookout span { font:500 10.5px/1.6 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); }
+    .lookout span b { color:var(--signal); font-weight:500; }
+    .tools .tally { display:none; }
+    .lookout button { background:none; border:0; padding:0 0 2px; color:var(--ink); font-family:"Instrument Sans",sans-serif; font-size:15px; text-decoration:underline dotted var(--signal); text-underline-offset:.3em; cursor:pointer; }
+    .lookout button .arw { display:inline-block; margin-left:4px; color:var(--signal); }
+    .lookout.hint button .arw { animation:dl-nod 1.4s cubic-bezier(.34,1.56,.64,1) .8s 2; }
+    @keyframes dl-nod { 0%,100% { transform:translateY(0); } 30% { transform:translateY(3px); } 60% { transform:translateY(0); } }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tuck.act.armed::before { transform:none; }
+    .tuck .run i, .tuck .kind b, .lookout button .arw { animation:none !important; }
+  }
+  .notes.tucked .note, .notes.tucked h2 { display:none; }
+  .notes.tucked .praise { margin-top:0; }
+  @media (max-width:900px) {
+    header.head { grid-template-columns:1fr; }
+    .ladder { overflow-x:auto; }
+    .ladder li:first-child { margin-left:0; }
+    .remark { grid-template-columns:1fr; gap:8px; }
+    .body { grid-template-columns:1fr; }
+    .notes { position:static; }
+  }
+  @media (max-width:600px) {
+    .sheet .party { flex-direction:column; }
+    .sheet .party span:last-child { font-size:.86em; color:var(--muted); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
+</style>
+</head>
+<body>
+<div class="sample-bar">
+  <span>Sample · Draft Lab review, redesigned · real review of 28 Oct</span>
+  <div class="tabs" role="group" aria-label="Theme">
+    <button type="button" data-theme-set="dark" aria-pressed="true">Dark</button>
+    <button type="button" data-theme-set="light" aria-pressed="false">Light</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header class="head">
+    <a class="back" href="#">‹&nbsp; Draft Lab</a>
+    <div>
+      <h1>Motion on Notice</h1>
+      <p class="sub">Your own matter</p>
+    </div>
+    <ol class="ladder" aria-label="Readiness">
+      <li>Incomplete</li><li>Developing</li><li class="is-current" aria-current="step">Sound</li><li>Strong</li><li>Exam-ready</li>
+    </ol>
+    <div class="remark">
+      <span class="label">Lexa</span>
+      <p>The motion on notice cannot stand as drafted: the authority recited is wrong in form, and the grounds for the application have not been drafted at all. The prayer and the service endorsement are also too thin to act on, and must be redrawn in the language of an order the registry can issue and an address the bailiff can use.</p>
+    </div>
+  </header>
+
+  <div class="lookout hint" id="lookout"><span><b>1 correction</b> · 2 to strengthen</span><button type="button" id="goto">Go to the correction<span class="arw" aria-hidden="true">↓</span></button></div>
+
+  <div class="tools">
+    <div class="tally"><span class="act"><b>1</b>to correct</span><span><b>2</b>to strengthen</span></div>
+    <div class="views">
+      <div class="tabs" role="group" aria-label="View">
+        <button type="button" data-view="clean" aria-pressed="true">Corrected</button>
+        <button type="button" data-view="original" aria-pressed="false">Original</button>
+      </div>
+      <button type="button" class="switch" id="changes" aria-pressed="false"><i aria-hidden="true"></i>Show changes</button>
+    </div>
+    <div class="quiet-acts"><button type="button">Review again</button><button type="button">Copy</button><button type="button">Print</button></div>
+  </div>
+
+  <div class="body">
+    <article class="sheet clean" id="sheet" aria-label="The motion, reviewed">
+      <div class="c">In the High Court of Lagos State<br>In the Lagos Judicial Division<br>Holden at Lagos</div>
+      <div class="r">Suit No: LD/4192GCM/2025</div>
+      <div>BETWEEN:</div>
+      <div class="party"><span>Crownfield Properties Ltd</span><span>Claimant/Applicant</span></div>
+      <div>AND</div>
+      <div class="party"><span>Apex Logistics Nigeria Plc</span><span>Defendant/Respondent</span></div>
+      <div class="t">Motion on notice</div>
+      <p data-n="1"><del class="was">BROUGHT PURSUANT TO THE INHERENT JURISDICTION OF THIS COURT ONLY</del> <ins class="now">BROUGHT PURSUANT TO ORDER 43 RULE 1 OF THE HIGH COURT OF LAGOS STATE (CIVIL PROCEDURE) RULES 2019 AND UNDER THE INHERENT JURISDICTION OF THIS HONOURABLE COURT</ins><sup class="n act">1</sup></p>
+      <p>TAKE NOTICE that this Honourable Court will be moved on Tuesday the 14th day of October 2025 at the hour of 9 o'clock in the forenoon or so soon thereafter as Counsel on behalf of the Claimant/Applicant may be heard praying the Court for the following orders:</p>
+      <p data-n="2"><span class="dev">1. AN ORDER of interlocutory injunction restraining the Defendant/Respondent, its agents and privies from selling the property at No. 12 Akin Adesola Street, Victoria Island, Lagos.</span><sup class="n">2</sup></p>
+      <p>2. Such further orders as this Honourable Court may deem fit to make in the circumstances.</p>
+      <div class="gap">Optional · not included: grounds</div>
+      <div class="sign">Dated this 3rd day of October 2025.<br><br>A. P. Obembe, Esq.<br>Counsel to the Claimant/Applicant<br>Victoria Island, Lagos</div>
+      <p data-n="3" style="margin-top:22px"><span class="dev">FOR SERVICE ON:<br>The Defendant/Respondent</span><sup class="n">3</sup></p>
+    </article>
+
+    <aside class="notes" aria-label="Lexa's notes">
+      <h2>Lexa's notes</h2>
+      <div class="note act" data-n="1">
+        <span class="num">01</span><span class="kind">Correct · Authority clause</span>
+        <p>State the rule that gives the court power to hear this application; the inherent jurisdiction alone cannot ground an interlocutory injunction. Recite Order 43 Rule 1 of the Lagos Rules 2019, adding the inherent jurisdiction if you wish.</p>
+        <button class="more" type="button">Full note</button>
+        <div class="full">Order 43 Rule 1(1), High Court of Lagos State (Civil Procedure) Rules 2019: a motion shall state the Rule of Court or Law under which the application is brought.</div>
+      </div>
+      <div class="note" data-n="2">
+        <span class="num">02</span><span class="kind">Strengthen · Reliefs</span>
+        <p>Pray for the order in words the registry can draw up: restrain the Respondent, by itself, its agents, privies and assigns, from selling, transferring, leasing or otherwise parting with possession of the property, pending the hearing and determination of this suit.</p>
+      </div>
+      <div class="note" data-n="3">
+        <span class="num">03</span><span class="kind">Strengthen · For service on</span>
+        <p>Name the Respondent and give an address at which service can be effected; as it stands, the bailiff has nothing to act on.</p>
+      </div>
+      <div class="praise" id="praise">
+        <button type="button" aria-expanded="false"><span>5 parts well drafted</span><span aria-hidden="true">›</span></button>
+        <ul>
+          <li><b>Judicial division</b>You have named the judicial division, which the usual form of a motion requires.</li>
+          <li><b>Holden at</b>You have given the place of sitting, and Lagos is a seat of the division you named.</li>
+          <li><b>Suit number</b>You have carried the suit number from the originating process.</li>
+          <li><b>Parties</b>You have titled the cause in the usual way, giving each party its capacity.</li>
+          <li><b>Opening clause</b>Your opening clause follows the usual words of motion practice.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <div class="foot">
+    <div class="left">
+      <a class="chev" href="#">‹&nbsp; Revise draft</a>
+      <a class="dotted" href="#">Compare with the model structure</a>
+    </div>
+    <a class="press" href="#"><span class="roll"><span>Complete exercise</span><span aria-hidden="true">Complete exercise</span></span><span class="chip" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h9.5M8.5 4l4 4-4 4"/></svg><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h9.5M8.5 4l4 4-4 4"/></svg></span></a>
+  </div>
+</div>
+
+<script>
+  const root = document.documentElement, sheet = document.getElementById("sheet"), changes = document.getElementById("changes");
+  document.querySelectorAll("[data-theme-set]").forEach((b) => b.addEventListener("click", () => {
+    root.dataset.theme = b.dataset.themeSet;
+    document.querySelectorAll("[data-theme-set]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  }));
+  let view = "clean";
+  const draw = () => {
+    sheet.classList.toggle("clean", view === "clean" && changes.getAttribute("aria-pressed") !== "true");
+    sheet.classList.toggle("original", view === "original");
+    document.querySelectorAll("[data-view]").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.view === view)));
+  };
+  document.querySelectorAll("[data-view]").forEach((b) => b.addEventListener("click", () => { view = b.dataset.view; if (view === "original") changes.setAttribute("aria-pressed", "false"); draw(); }));
+  changes.addEventListener("click", () => { changes.setAttribute("aria-pressed", String(changes.getAttribute("aria-pressed") !== "true")); if (view === "original") view = "clean"; draw(); });
+  // Margin notes and their leaders. Each note is placed level with its words; a note that would collide moves down,
+  // and its leader turns two square corners in the gutter. Pointing at a note lights its words and its leader.
+  const body = document.querySelector(".body"), notesCol = document.querySelector(".notes");
+  const svgNS = "http://www.w3.org/2000/svg";
+  const leaders = document.createElementNS(svgNS, "svg");
+  leaders.setAttribute("class", "leaders");
+  leaders.setAttribute("aria-hidden", "true");
+  body.appendChild(leaders);
+  const notes = Array.from(document.querySelectorAll(".note"));
+  const praiseBox = document.getElementById("praise");
+  let mode = "";
+  function place() {
+    const wide = window.matchMedia("(min-width: 901px)").matches;
+    // On the phone the notes are tucked in once; re-tucking would resize the page and fire this again.
+    if (!wide && mode === "narrow") return;
+    mode = wide ? "wide" : "narrow";
+    notesCol.classList.toggle("placed", wide);
+    leaders.innerHTML = "";
+    sheet.querySelectorAll(".tuck").forEach((t) => t.remove());
+    notesCol.classList.toggle("tucked", !wide);
+    if (!wide) {
+      notes.forEach((n) => (n.style.top = "")); praiseBox.style.top = ""; notesCol.style.minHeight = "";
+      // Each note goes under the part it corrects.
+      notes.forEach((n) => {
+        const part = sheet.querySelector(`[data-n="${n.dataset.n}"]`);
+        if (!part) return;
+        const t = document.createElement("div");
+        t.className = "tuck" + (n.classList.contains("act") ? " act" : "");
+        const kind = n.querySelector(".kind").textContent;
+        t.innerHTML = `<span class="kind"><b>${n.querySelector(".num").textContent}</b>${kind}</span><p>${n.querySelector("p").textContent}</p>` +
+          (n.querySelector(".full") ? `<button class="more" type="button">Full note</button><div class="full">${n.querySelector(".full").textContent}</div>` : "");
+        t.querySelector(".more")?.addEventListener("click", () => t.classList.toggle("open"));
+        const run = document.createElement("span"); run.className = "run"; run.setAttribute("aria-hidden", "true"); run.appendChild(document.createElement("i"));
+        t.appendChild(run);
+        if (t.classList.contains("act")) t.classList.add("armed");
+        part.insertAdjacentElement("afterend", t);
+      });
+      sheet.classList.add("has-tucks");
+      // A correction says so once as it comes into view.
+      const seen = new IntersectionObserver((es) => es.forEach((e) => {
+        if (!e.isIntersecting) return;
+        seen.unobserve(e.target);
+        e.target.classList.add("seen");
+      }), { rootMargin: "0px 0px -22% 0px" });
+      sheet.querySelectorAll(".tuck.act").forEach((t) => seen.observe(t));
+      return;
+    }
+    const b = body.getBoundingClientRect(), col = notesCol.getBoundingClientRect(), sh = sheet.getBoundingClientRect();
+    const head = notesCol.querySelector("h2").offsetHeight + 12;
+    let floor = head;
+    const gutterMid = (sh.right + col.left) / 2 - b.left;
+    notes.forEach((n) => {
+      const para = sheet.querySelector(`[data-n="${n.dataset.n}"]`);
+      const r = para.getBoundingClientRect();
+      const markY = r.top - b.top + 12;
+      const want = r.top - col.top;
+      const top = Math.max(want, floor);
+      n.style.top = top + "px";
+      floor = top + n.offsetHeight + 8;
+      const noteY = col.top - b.top + top + 12;
+      const x0 = sh.right - b.left, x1 = col.left - b.left - 6;
+      const g = document.createElementNS(svgNS, "g");
+      if (n.classList.contains("act")) g.setAttribute("class", "is-act");
+      g.dataset.n = n.dataset.n;
+      const path = document.createElementNS(svgNS, "path");
+      path.setAttribute("d", Math.abs(noteY - markY) < 2
+        ? `M${x0},${markY} H${x1}`
+        : `M${x0},${markY} H${gutterMid} V${noteY} H${x1}`);
+      const dot = document.createElementNS(svgNS, "circle");
+      dot.setAttribute("cx", x0); dot.setAttribute("cy", markY); dot.setAttribute("r", 2);
+      g.append(path, dot);
+      leaders.appendChild(g);
+    });
+    praiseBox.style.top = floor + 8 + "px";
+    notesCol.style.minHeight = floor + praiseBox.offsetHeight + 24 + "px";
+  }
+  notes.forEach((n) => {
+    const on = () => {
+      const t = sheet.querySelector(`[data-n="${n.dataset.n}"]`); t && t.classList.add("lit");
+      leaders.querySelector(`g[data-n="${n.dataset.n}"]`)?.classList.add("is-on");
+    };
+    const off = () => {
+      sheet.querySelectorAll(".lit").forEach((x) => x.classList.remove("lit"));
+      leaders.querySelectorAll(".is-on").forEach((x) => x.classList.remove("is-on"));
+    };
+    n.addEventListener("mouseenter", on); n.addEventListener("mouseleave", off);
+    const more = n.querySelector(".more"); more && more.addEventListener("click", () => { n.classList.toggle("open"); place(); });
+  });
+  // Straight to the correction; its hint plays again on arrival.
+  document.getElementById("goto").addEventListener("click", () => {
+    const t = sheet.querySelector(".tuck.act") || document.querySelector(".note.act");
+    if (!t) return;
+    t.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" });
+    t.classList.remove("seen"); void t.offsetWidth; window.setTimeout(() => t.classList.add("seen"), 450);
+  });
+  addEventListener("resize", place);
+  new ResizeObserver(place).observe(sheet);
+  document.fonts && document.fonts.ready.then(place);
+  place();
+  const praise = document.getElementById("praise");
+  praise.querySelector("button").addEventListener("click", (e) => { praise.classList.toggle("open"); e.currentTarget.setAttribute("aria-expanded", String(praise.classList.contains("open"))); place(); });
+
+  // The correction plays once, as the clause comes into view: the draft as written, then struck and written in,
+  // then the clean page.
+  (async function replay() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const del = sheet.querySelector("del.was"), ins = sheet.querySelector("ins.now");
+    sheet.classList.remove("clean"); changes.setAttribute("aria-pressed", "true");
+    del.style.setProperty("--strike", 0); ins.classList.add("is-wait");
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    const tween = (ms, f) => new Promise((r) => { const t0 = performance.now(); const k = (n) => { const t = Math.min(1, (n - t0) / ms); f(t); t < 1 ? requestAnimationFrame(k) : r(); }; requestAnimationFrame(k); });
+    await new Promise((r) => { const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); r(); } }, { rootMargin: "0px 0px -20% 0px" }); io.observe(del); });
+    await wait(400);
+    await tween(700, (t) => del.style.setProperty("--strike", t));
+    // The insertion writes in word by word, the line growing as a tracked change does.
+    const words = ins.textContent.split(" ");
+    ins.innerHTML = words.map((w, i) => `<span class="w" style="display:none;opacity:0">${w}${i < words.length - 1 ? " " : ""}</span>`).join("");
+    ins.classList.remove("is-wait");
+    for (const w of ins.querySelectorAll(".w")) { w.style.display = "inline"; tween(220, (t) => (w.style.opacity = t)); await wait(45); }
+    await wait(1600);
+    changes.setAttribute("aria-pressed", "false"); draw();
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LexTutor app plans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&family=Tinos:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  /* The app's own house tokens (lextutor-landing/styles/globals.css), both themes. */
+  :root, :root[data-theme="dark"] {
+    --canvas:#090a0d; --page:#0f1014; --surface:#15161b; --ink:#f1f0ed; --muted:#aaa9ad; --quiet:#828187;
+    --line:#2b2b31; --gold:#d2b481; --gold-strong:#d0ad70; --btn-border:#4b4338; --btn-ink:#e0c38b;
+    --wash:rgba(210,180,129,.12); --fix:#c8644c; --track:#303036; --bar-opt:#6e6e76;
+  }
+  :root[data-theme="light"] {
+    --canvas:#e7e7e3; --page:#f0f0ed; --surface:#fbfbf8; --ink:#17171b; --muted:#515258; --quiet:#5c5d63;
+    --line:#c9c9c3; --gold:#71531f; --gold-strong:#684a18; --btn-border:#76531d; --btn-ink:#2b1b06;
+    --wash:rgba(113,83,31,.1); --fix:#a2432b; --track:#c7c7c1; --bar-opt:#9a9aa0;
+  }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--canvas); color:var(--ink); font-family:"Source Sans 3",system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  .mono { font-family:"IBM Plex Mono",monospace; }
+
+  .top { position:sticky; top:0; z-index:10; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px clamp(16px,4vw,48px); background:color-mix(in srgb,var(--canvas) 88%,transparent); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+  .top b { font-family:"Instrument Sans",sans-serif; font-weight:500; font-size:16px; letter-spacing:-.01em; }
+  .tabs { display:flex; gap:14px; }
+  .tabs button { background:none; border:0; padding:6px 0; font:500 10.5px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); cursor:pointer; }
+  .tabs button[aria-pressed="true"] { color:var(--ink); box-shadow:inset 0 -1px 0 var(--gold); }
+
+  .intro { max-width:1180px; margin:0 auto; padding:clamp(40px,6vw,80px) clamp(16px,4vw,48px) 8px; }
+  .intro h1 { font-family:"Instrument Sans",sans-serif; font-weight:500; font-size:clamp(34px,4.6vw,60px); line-height:1; letter-spacing:-.04em; }
+  .intro h1 span { display:block; font-size:.5625em; letter-spacing:-.02em; margin-bottom:.2em; }
+  .intro h1 em { font-style:normal; color:var(--gold); }
+  .intro p { margin-top:18px; max-width:62ch; font-size:17px; line-height:1.55; color:var(--muted); }
+  .note-line { margin-top:14px; font-size:15px; color:var(--muted); }
+  .note-line a { color:var(--gold); text-decoration:underline dotted; text-underline-offset:.3em; }
+
+  .plan { max-width:1180px; margin:0 auto; padding:clamp(48px,6vw,88px) clamp(16px,4vw,48px); border-top:1px solid var(--line); }
+  .plan-head { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px 24px; align-items:end; margin-bottom:28px; }
+  .kick { font:500 10.5px/1.4 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--gold-strong); }
+  .plan h2 { grid-column:1; margin-top:10px; font-family:"Instrument Sans",sans-serif; font-weight:500; font-size:clamp(26px,2.8vw,38px); letter-spacing:-.03em; line-height:1.05; }
+  .plan-head p { grid-column:1; margin-top:10px; max-width:66ch; font-size:16.5px; line-height:1.55; color:var(--muted); }
+  .where { grid-column:1; margin-top:8px; font:500 10.5px/1.6 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--quiet); }
+  .replay { grid-column:2; grid-row:1 / span 4; align-self:end; }
+  .stage { background:var(--page); border:1px solid var(--line); padding:clamp(20px,3vw,40px); }
+  .pair { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); }
+  .pair > div { background:var(--page); padding:clamp(22px,3vw,40px); display:flex; flex-direction:column; gap:18px; align-items:flex-start; }
+  .pair h3 { font:500 10.5px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); }
+  .pair h3 b { color:var(--gold-strong); font-weight:500; }
+  .hint { font-size:14px; color:var(--quiet); }
+
+  /* ── 1 · Buttons ───────────────────────────────────────────── */
+  .dbtn { display:inline-flex; align-items:center; gap:12px; height:44px; padding:0 16px; background:transparent; border:1px solid var(--btn-border); color:var(--btn-ink); font:500 11px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; cursor:pointer; text-decoration:none; border-radius:0; }
+  .dbtn svg { width:15px; height:15px; flex:none; }
+  /* Today: gold wash + 1px lift */
+  .dbtn.today { transition:background-color .16s ease, transform .16s ease; }
+  .dbtn.today:hover { background:var(--wash); transform:translateY(-1px); }
+  /* Proposed: the label rolls to its twin, the arrow leaves and returns, the press springs */
+  .dbtn.new { position:relative; transition:transform .45s cubic-bezier(.34,1.56,.64,1), border-color .3s ease; }
+  .dbtn.new .roll { display:grid; height:1.25em; overflow:hidden; line-height:1.25; }
+  .dbtn.new .roll span { grid-area:1/1; transition:transform .5s cubic-bezier(.7,0,.2,1); }
+  .dbtn.new .roll span + span { transform:translateY(115%); color:var(--ink); }
+  .dbtn.new .arw { position:relative; width:15px; height:15px; overflow:hidden; }
+  .dbtn.new .arw svg { position:absolute; inset:0; transition:transform .5s cubic-bezier(.7,0,.2,1); }
+  .dbtn.new .arw svg + svg { transform:translateX(-140%); color:var(--ink); }
+  .dbtn.new:hover { border-color:var(--gold); }
+  .dbtn.new:hover .roll span:first-child, .dbtn.new.play .roll span:first-child { transform:translateY(-115%); }
+  .dbtn.new:hover .roll span + span, .dbtn.new.play .roll span + span { transform:translateY(0); }
+  .dbtn.new:hover .arw svg:first-child, .dbtn.new.play .arw svg:first-child { transform:translateX(140%); }
+  .dbtn.new:hover .arw svg + svg, .dbtn.new.play .arw svg + svg { transform:translateX(0); }
+  .dbtn.new:active { transform:scale(.94); }
+  .dbtn:focus-visible, .tabs button:focus-visible, .rbtn:focus-visible, .lexa-mark:focus-visible { outline:1px solid var(--gold); outline-offset:3px; }
+  .wordlink { display:inline-flex; align-items:center; gap:6px; color:var(--gold); font-family:"Instrument Sans",sans-serif; font-size:16px; text-decoration:none; position:relative; }
+  .wordlink .chev { display:inline-block; transition:transform .45s cubic-bezier(.34,1.56,.64,1); }
+  .wordlink::after { content:""; position:absolute; left:0; right:14px; bottom:-3px; border-bottom:1px dotted currentColor; }
+  .wordlink.new::after { border-bottom-style:solid; transform-origin:left; transform:scaleX(0); transition:transform .5s cubic-bezier(.7,0,.2,1); }
+  .wordlink.new { --dots:1; }
+  .wordlink.new::before { content:""; position:absolute; left:0; right:14px; bottom:-3px; border-bottom:1px dotted currentColor; transition:opacity .3s ease; }
+  .wordlink.new:hover::after { transform:scaleX(1); }
+  .wordlink.new:hover::before { opacity:0; }
+  .wordlink.new:hover .chev { transform:translateX(4px); }
+
+  /* Replay control: the house's square hairline button */
+  .rbtn { display:inline-flex; align-items:center; gap:8px; height:34px; padding:0 12px; background:none; border:1px solid var(--line); color:var(--muted); font:500 10.5px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; cursor:pointer; white-space:nowrap; }
+  .rbtn:hover { color:var(--ink); border-color:var(--quiet); }
+  .rbtn svg { width:13px; height:13px; }
+
+  /* ── 2 · Play the correction once ──────────────────────────── */
+  .draft { display:grid; grid-template-columns:minmax(0,1fr) 230px; gap:28px; align-items:start; }
+  .sheet { position:relative; background:var(--surface); border:1px solid var(--line); padding:clamp(22px,3vw,40px) clamp(20px,3.4vw,48px); font-family:"Tinos","Times New Roman",serif; font-size:15px; line-height:1.62; }
+  .sheet .court { text-align:center; font-weight:700; text-transform:uppercase; line-height:1.45; }
+  .sheet .ttl { margin:14px 0 12px; text-align:center; font-weight:700; text-transform:uppercase; text-decoration:underline; text-underline-offset:.25em; }
+  .sheet p { margin:0 0 12px; text-align:justify; }
+  .sheet .dim { color:var(--muted); }
+  .del { --find:0; --strike:0; --dim:0; color:color-mix(in srgb,var(--quiet) calc(var(--dim)*100%),var(--ink)); text-decoration:underline dotted; text-decoration-thickness:1px; text-underline-offset:.3em; text-decoration-color:color-mix(in srgb,var(--gold) calc(var(--find)*100%),transparent); background-image:linear-gradient(var(--fix),var(--fix)); background-repeat:no-repeat; background-position:0 58%; background-size:calc(var(--strike)*100%) 1px; }
+  .ins { color:var(--gold); font-weight:700; text-decoration:none; }
+  .ins .w { opacity:0; display:none; }
+  .sheet sup { font:600 10px "IBM Plex Mono",monospace; color:var(--gold); margin-left:3px; opacity:0; }
+  .sheet.clean .del { display:none; }
+  .sheet.clean .ins { color:var(--ink); font-weight:400; transition:color .8s ease; }
+  .sheet.clean sup { opacity:0 !important; }
+  .travel { position:absolute; left:0; right:0; bottom:-1px; height:1px; overflow:hidden; }
+  .travel i { position:absolute; top:0; left:-20%; width:20%; height:1px; background:linear-gradient(90deg,transparent,var(--gold),transparent); opacity:0; }
+  .side { font-size:14.5px; color:var(--muted); line-height:1.5; }
+  .side .status { font:500 10.5px/1.6 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--quiet); min-height:3.2em; }
+  .side .status b { color:var(--gold); font-weight:500; }
+  .views { display:flex; gap:14px; margin-top:16px; }
+  .views button { background:none; border:0; padding:4px 0; font:500 10.5px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); cursor:pointer; }
+  .views button[aria-pressed="true"] { color:var(--ink); box-shadow:inset 0 -1px 0 var(--gold); }
+  .snote { margin-top:18px; padding-left:12px; border-left:1px solid var(--gold); font-family:"Geist",sans-serif; opacity:0; transform:translateY(6px); }
+  .snote b { display:block; font:500 10.5px/1.5 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); }
+  .snote span { display:block; margin-top:4px; font-size:14.5px; line-height:1.45; color:var(--ink); }
+
+  /* ── 3 · Lexa's note drawn to its sentence ─────────────────── */
+  .answer { position:relative; display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:36px; }
+  .answer .text { font-size:18px; line-height:1.65; }
+  .answer .q { font:500 10.5px/1.5 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--quiet); margin-bottom:14px; }
+  .flag { --on:0; background:color-mix(in srgb,var(--gold) calc(var(--on)*18%),transparent); box-shadow:inset 0 -1px 0 color-mix(in srgb,var(--gold) calc(var(--on)*100%),transparent); transition:background-color .1s; }
+  .lexa-mark { display:inline-grid; place-items:center; width:18px; height:18px; margin-left:4px; vertical-align:2px; border:1px solid var(--gold); color:var(--gold); background:none; font:600 10px "IBM Plex Mono",monospace; cursor:pointer; padding:0; }
+  .lexa-col { position:relative; }
+  .lexa-lead { position:absolute; height:1px; background:var(--gold); transform-origin:left; transform:scaleX(0); }
+  .lexa-note { position:relative; font-family:"Geist",sans-serif; border:1px solid var(--line); background:var(--surface); padding:16px 18px; opacity:0; transform:translateY(8px); }
+  .lexa-note b { display:block; font:500 10.5px/1.5 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); }
+  .lexa-note strong { display:block; margin-top:8px; font-weight:500; font-size:15.5px; }
+  .lexa-note span { display:block; margin-top:4px; font-size:14.5px; line-height:1.5; color:var(--muted); }
+
+  /* ── 4 · Figures count once, the graph rises ───────────────── */
+  .stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+  .stats div { padding:18px 0 18px 0; }
+  .stats div + div { padding-left:24px; border-left:1px solid var(--line); }
+  .stats small { display:block; font:500 10.5px/1.4 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); }
+  .stats strong { display:block; margin-top:10px; font-family:"Instrument Sans",sans-serif; font-weight:500; font-size:clamp(34px,4vw,52px); letter-spacing:-.04em; line-height:1; font-variant-numeric:tabular-nums; }
+  .stats strong.gold { color:var(--gold); }
+  .stats strong em { font-style:normal; font-size:.42em; letter-spacing:-.01em; color:var(--muted); }
+  .graph { margin-top:26px; }
+  .graph-head { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font:500 10.5px/1.4 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--quiet); }
+  .graph-head i { display:inline-block; width:9px; height:9px; margin:0 6px 0 14px; vertical-align:-1px; }
+  .bars { position:relative; display:grid; grid-template-columns:repeat(18,minmax(0,1fr)); gap:clamp(4px,1vw,12px); align-items:end; height:180px; margin-top:16px; border-bottom:1px solid var(--quiet); background:repeating-linear-gradient(to top,var(--track) 0 1px,transparent 1px 36px); }
+  .bar { display:flex; flex-direction:column-reverse; height:100%; }
+  .bar span { display:block; transform-origin:bottom; transform:scaleY(0); }
+  .bar .c { background:var(--gold); }
+  .bar .o { background:var(--bar-opt); }
+  .xl { display:grid; grid-template-columns:repeat(18,minmax(0,1fr)); gap:clamp(4px,1vw,12px); margin-top:8px; font:500 10px/1 "IBM Plex Mono",monospace; color:var(--quiet); text-align:center; }
+
+  /* ── 5 · Pinned summary, scrolling appearances ─────────────── */
+  .scroller { height:420px; overflow-y:auto; border:1px solid var(--line); background:var(--page); overscroll-behavior:contain; }
+  .split { display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); }
+  .pin { position:sticky; top:0; align-self:start; padding:24px; border-right:1px solid var(--line); }
+  .pin h4 { font-family:"Instrument Sans",sans-serif; font-weight:500; font-size:24px; letter-spacing:-.03em; line-height:1.05; }
+  .pin p { margin-top:10px; font-size:14.5px; color:var(--muted); line-height:1.5; }
+  .pin .mini { display:grid; grid-template-columns:repeat(18,1fr); gap:3px; align-items:end; height:64px; margin-top:18px; border-bottom:1px solid var(--quiet); }
+  .pin .mini span { display:flex; flex-direction:column-reverse; height:100%; }
+  .pin .mini b { display:block; }
+  .pin .mini.sel b.c { outline:1px solid var(--ink); }
+  .list { padding:8px 24px 24px; }
+  .row { display:grid; grid-template-columns:96px minmax(0,1fr) auto; align-items:center; gap:12px; padding:16px 0; border-bottom:1px solid var(--line); }
+  .row .y { font:500 12px "IBM Plex Mono",monospace; color:var(--quiet); }
+  .row .qn { font-family:"Instrument Sans",sans-serif; font-weight:500; font-size:18px; }
+  .tag { font:500 10px/1 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; padding:6px 8px; border:1px solid var(--line); color:var(--quiet); }
+  .tag.c { border-color:var(--gold); color:var(--gold); }
+  .row.on { background:linear-gradient(90deg,var(--wash),transparent 70%); }
+
+  .stay { max-width:1180px; margin:0 auto; padding:clamp(48px,6vw,88px) clamp(16px,4vw,48px) 120px; border-top:1px solid var(--line); }
+  .stay ul { margin-top:18px; padding:0; list-style:none; columns:2; column-gap:40px; }
+  .stay li { break-inside:avoid; padding:12px 0; border-bottom:1px solid var(--line); font-size:16px; color:var(--muted); }
+  .stay li b { color:var(--ink); font-weight:600; }
+
+  @media (max-width: 760px) {
+    .plan-head { grid-template-columns:1fr; }
+    .replay { grid-column:1; grid-row:auto; margin-top:10px; justify-self:start; }
+    .pair { grid-template-columns:1fr; }
+    .draft, .answer { grid-template-columns:1fr; gap:18px; }
+    .sheet p { text-align:left; }
+    .lexa-lead { display:none; }
+    .stats { grid-template-columns:1fr 1fr; }
+    .stats div:nth-child(3) { grid-column:1 / -1; border-left:0; padding-left:0; border-top:1px solid var(--line); }
+    .bars { height:140px; }
+    .xl { font-size:8.5px; }
+    .split { grid-template-columns:1fr; }
+    .pin { position:sticky; top:0; z-index:1; background:var(--page); border-right:0; border-bottom:1px solid var(--line); padding:16px; }
+    .pin p { display:none; }
+    .pin .mini { height:44px; margin-top:10px; }
+    .list { padding:0 16px 16px; }
+    .row { grid-template-columns:76px minmax(0,1fr) auto; }
+    .stay ul { columns:1; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; } }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <b>LexTutor · app plans</b>
+  <div class="tabs" role="group" aria-label="Appearance">
+    <button type="button" data-theme-set="light" aria-pressed="false">Light</button>
+    <button type="button" data-theme-set="dark" aria-pressed="true">Dark</button>
+  </div>
+</div>
+
+<header class="intro">
+  <h1><span>From the landing page</span><em>into the app.</em></h1>
+  <p>Five things the landing does that the app could carry, shown in the app's own black and gold, in both themes. Each plays once when it comes into view; Replay runs it again. Data is the app's own: Interlocutory Applications and Orders, from the topic map.</p>
+  <p class="note-line">Landing, separately: recapture the app screens in light mode for the previews. Waiting on your go, since memory ran short earlier.</p>
+</header>
+
+<!-- 1 -->
+<section class="plan" id="p1">
+  <div class="plan-head">
+    <p class="kick">01 · Every button on the desk</p>
+    <h2>The press answers the hand</h2>
+    <p>The label rolls to its twin and the arrow leaves and returns; a press springs. It replaces the gold wash, keeping the square hairline, the tracked mono label and the 15px arrow (principle 14).</p>
+    <p class="where">Submit answer · Explore papers · Open in Draft Lab · Review ›</p>
+    <button class="rbtn replay" type="button" data-replay="1"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.8h2.8"/></svg>Replay</button>
+  </div>
+  <div class="pair">
+    <div>
+      <h3>Today</h3>
+      <a class="dbtn today" href="#p1">Submit answer<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
+      <a class="dbtn today" href="#p1">Explore papers<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
+      <a class="wordlink" href="#p1">Review <span class="chev">›</span></a>
+      <p class="hint">Hover: a gold wash and a one-pixel lift.</p>
+    </div>
+    <div>
+      <h3><b>Proposed</b></h3>
+      <a class="dbtn new" href="#p1"><span class="roll"><span>Submit answer</span><span aria-hidden="true">Submit answer</span></span><span class="arw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h15M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
+      <a class="dbtn new" href="#p1"><span class="roll"><span>Explore papers</span><span aria-hidden="true">Explore papers</span></span><span class="arw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h15M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
+      <a class="wordlink new" href="#p1">Review <span class="chev">›</span></a>
+      <p class="hint">Hover or press. The dotted link draws solid and its chevron steps on.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="plan" id="p2">
+  <div class="plan-head">
+    <p class="kick">02 · Draft Lab, when a review first opens</p>
+    <h2>Play the correction once, then rest on the clean draft</h2>
+    <p>Over the learner's own document: Lexa finds the clause, strikes it in reading order, writes the provision in, and draws the note. Then it settles on Corrected (clean), the default view (principle 6). Show changes keeps the markup one step away.</p>
+    <p class="where">Draft Lab review · first open only · still under reduced motion</p>
+    <button class="rbtn replay" type="button" data-replay="2"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.8h2.8"/></svg>Replay</button>
+  </div>
+  <div class="stage">
+    <div class="draft">
+      <article class="sheet" id="sheet">
+        <div class="court">In the High Court of Lagos State<br>In the Lagos Judicial Division<br>Holden at Lagos</div>
+        <div class="ttl">Motion on notice</div>
+        <p>BROUGHT <del class="del">pursuant to the inherent jurisdiction of this Court only</del> <ins class="ins" id="ins"></ins><sup>1</sup></p>
+        <p class="dim"><b>TAKE NOTICE</b> that this Honourable Court will be moved on Tuesday the 14th day of October 2025 at the hour of 9 o’clock in the forenoon or so soon thereafter as Counsel may be heard praying the Court for an Order of interlocutory injunction.</p>
+        <span class="travel" aria-hidden="true"><i></i></span>
+      </article>
+      <div class="side">
+        <p class="status" id="status">Lexa is reading</p>
+        <div class="views" role="group" aria-label="View">
+          <button type="button" data-view="clean" aria-pressed="false">Corrected</button>
+          <button type="button" data-view="changes" aria-pressed="true">Show changes</button>
+        </div>
+        <div class="snote" id="snote"><b>1 · Order 43 Rule 1(1), Lagos 2019</b><span>A motion must state the Rule of Court or Law under which it is brought.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="plan" id="p3">
+  <div class="plan-head">
+    <p class="kick">03 · Paper review and Lexa Points</p>
+    <h2>Lexa's note, drawn to the words that prompted it</h2>
+    <p>Touch a note's number: the sentence lights in the system's own highlight, a hairline draws from it, and the note rises beside it. On the phone the same note opens in the sheet with its words held in view above (principle 13).</p>
+    <p class="where">Paper Practice review · Lexa Points · desk and phone</p>
+    <button class="rbtn replay" type="button" data-replay="3"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.8h2.8"/></svg>Replay</button>
+  </div>
+  <div class="stage">
+    <div class="answer" id="answer">
+      <div class="text">
+        <p class="q">2025 Question 3(a) · Your answer</p>
+        <p>I will commence the action under the <span class="flag" id="flag">undefended list procedure</span><button class="lexa-mark" type="button" id="lexaMark" aria-label="Open Lexa's note 1">1</button>, since the debtor has no defence to the claim and the sum is liquidated.</p>
+      </div>
+      <div class="lexa-col">
+        <span class="lexa-lead" id="lead"></span>
+        <aside class="lexa-note" id="lexaNote"><b>1 · Correction</b><strong>Order 13 Rule 1, Lagos 2019</strong><span>Lagos has no undefended list. The claimant files for summary judgment with the originating process.</span></aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="plan" id="p4">
+  <div class="plan-head">
+    <p class="kick">04 · Topic Drilldown, first view of a topic</p>
+    <h2>Figures count once; the graph rises</h2>
+    <p>The three figures run up to their real values and the square-ended columns rise from the baseline, compulsory in gold. Once per visit, never looping. Reopening the topic shows them still.</p>
+    <p class="where">Topic page · stats row and the parts graph</p>
+    <button class="rbtn replay" type="button" data-replay="4"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.8h2.8"/></svg>Replay</button>
+  </div>
+  <div class="stage">
+    <div class="stats">
+      <div><small>Sittings that set it</small><strong><span data-count="15">15</span><em> of 18</em></strong></div>
+      <div><small>As a compulsory question</small><strong class="gold"><span data-count="8">8</span></strong></div>
+      <div><small>Last set</small><strong><span data-count="2024" data-from="2010">2024</span></strong></div>
+    </div>
+    <div class="graph">
+      <div class="graph-head"><span>Parts of the paper on this topic, 2010 to 2025</span><span><i style="background:var(--gold)"></i>In a compulsory question<i style="background:var(--bar-opt)"></i>In an optional question</span></div>
+      <div class="bars" id="bars"></div>
+      <div class="xl" id="xl"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="plan" id="p5">
+  <div class="plan-head">
+    <p class="kick">05 · Topic page on the desk</p>
+    <h2>The summary holds; the appearances pass</h2>
+    <p>The topic's figures and graph stay pinned on the left while every appearance scrolls on the right, and the sitting in view is marked on the graph. Scroll inside the frame. On the phone the summary stays as a slim band at the top.</p>
+    <p class="where">Topic page · "Every appearance" · 25 for this topic</p>
+  </div>
+  <div class="scroller" id="scroller">
+    <div class="split">
+      <div class="pin">
+        <p class="kick">Week 07</p>
+        <h4>Interlocutory Applications and Orders</h4>
+        <p>Set in 15 of 18 sittings; compulsory in 8.</p>
+        <div class="mini" id="mini"></div>
+        <p class="hint" id="pinNow" style="margin-top:10px">In view: 2024</p>
+      </div>
+      <div class="list" id="list"></div>
+    </div>
+  </div>
+</section>
+
+<section class="stay">
+  <p class="kick">What stays on the landing</p>
+  <ul>
+    <li><b>The ember, green and oxblood chapters.</b> The app keeps black and gold; it is a room you work in for hours.</li>
+    <li><b>Grain and the gradient.</b> Texture for a page read once.</li>
+    <li><b>The giant wordmark.</b> The app already says where you are.</li>
+    <li><b>The statement that fills word by word.</b> A reading device for marketing, not for study.</li>
+  </ul>
+</section>
+
+<script>
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const wait = (ms) => new Promise((r) => setTimeout(r, reduce ? 0 : ms));
+  const tween = (ms, fn, ease = (t) => 1 - Math.pow(1 - t, 3)) => new Promise((done) => {
+    if (reduce) { fn(1); return done(); }
+    const t0 = performance.now();
+    const step = (now) => { const t = Math.min(1, (now - t0) / ms); fn(ease(t)); t < 1 ? requestAnimationFrame(step) : done(); };
+    requestAnimationFrame(step);
+  });
+
+  // Theme switch (shows both states).
+  document.querySelectorAll("[data-theme-set]").forEach((b) => b.addEventListener("click", () => {
+    document.documentElement.dataset.theme = b.dataset.themeSet;
+    document.querySelectorAll("[data-theme-set]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+  }));
+
+  // 1 · Buttons demo plays once by itself.
+  async function play1() {
+    const btns = [...document.querySelectorAll("#p1 .dbtn.new")];
+    for (const b of btns) { b.classList.add("play"); await wait(700); b.classList.remove("play"); await wait(200); }
+  }
+
+  // 2 · The correction plays once, then rests on the clean draft.
+  const INSERT = "PURSUANT TO ORDER 43 RULE 1 OF THE HIGH COURT OF LAGOS STATE (CIVIL PROCEDURE) RULES 2019 AND UNDER THE INHERENT JURISDICTION OF THIS HONOURABLE COURT".split(" ");
+  const ins = document.getElementById("ins");
+  ins.innerHTML = INSERT.map((w, i) => `<span class="w">${w}${i < INSERT.length - 1 ? " " : ""}</span>`).join("");
+  const sheet = document.getElementById("sheet"), del = sheet.querySelector(".del"), sup = sheet.querySelector("sup");
+  const status = document.getElementById("status"), snote = document.getElementById("snote"), light = sheet.querySelector(".travel i");
+  const setView = (v) => {
+    sheet.classList.toggle("clean", v === "clean");
+    document.querySelectorAll("[data-view]").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.view === v)));
+    snote.style.opacity = v === "clean" ? "0.35" : "1";
+  };
+  document.querySelectorAll("[data-view]").forEach((b) => b.addEventListener("click", () => setView(b.dataset.view)));
+  let run2 = 0;
+  async function play2() {
+    const id = ++run2;
+    setView("changes");
+    del.style.setProperty("--find", 0); del.style.setProperty("--strike", 0); del.style.setProperty("--dim", 0);
+    ins.querySelectorAll(".w").forEach((w) => { w.style.display = "none"; w.style.opacity = 0; });
+    sup.style.opacity = 0; snote.style.opacity = 0; snote.style.transform = "translateY(6px)";
+    status.innerHTML = "Lexa is reading";
+    light.style.opacity = 1;
+    tween(1400, (t) => { light.style.left = (-20 + t * 120) + "%"; }, (t) => t).then(() => { light.style.opacity = 0; });
+    await wait(700); if (id !== run2) return;
+    await tween(500, (t) => del.style.setProperty("--find", t));
+    await wait(250); if (id !== run2) return;
+    await tween(900, (t) => { del.style.setProperty("--strike", t); del.style.setProperty("--dim", t); del.style.setProperty("--find", 1 - t); }, (t) => t);
+    for (const w of ins.querySelectorAll(".w")) { if (id !== run2) return; w.style.display = "inline"; tween(220, (t) => (w.style.opacity = t)); await wait(70); }
+    sup.style.opacity = 1;
+    await tween(450, (t) => { snote.style.opacity = t; snote.style.transform = `translateY(${6 * (1 - t)}px)`; });
+    status.innerHTML = "<b>1 correction</b> · Order 43 Rule 1(1)";
+    await wait(1600); if (id !== run2) return;
+    setView("clean");
+  }
+
+  // 3 · Lexa's note drawn to its sentence.
+  const flag = document.getElementById("flag"), lead = document.getElementById("lead"), note = document.getElementById("lexaNote"), answer = document.getElementById("answer");
+  function placeLead() {
+    // The hairline runs from the text column's edge, level with the flagged words, to the note.
+    const f = flag.getBoundingClientRect(), col = note.parentElement.getBoundingClientRect();
+    const tx = answer.querySelector(".text").getBoundingClientRect();
+    const from = tx.right - col.left + 8;
+    lead.style.top = (f.top + f.height / 2 - col.top) + "px";
+    lead.style.left = from + "px";
+    lead.style.width = Math.max(0, -from) + "px";
+    note.style.marginTop = innerWidth <= 760 ? "0px" : Math.max(0, f.top - col.top - 18) + "px";
+  }
+  async function play3() {
+    note.style.opacity = 0; note.style.transform = "translateY(8px)"; flag.style.setProperty("--on", 0); lead.style.transform = "scaleX(0)";
+    placeLead();
+    await wait(300);
+    await tween(450, (t) => flag.style.setProperty("--on", t));
+    await tween(500, (t) => (lead.style.transform = `scaleX(${t})`));
+    await tween(450, (t) => { note.style.opacity = t; note.style.transform = `translateY(${8 * (1 - t)}px)`; });
+  }
+  document.getElementById("lexaMark").addEventListener("click", play3);
+  addEventListener("resize", placeLead);
+
+  // 4 · Figures count once; the graph rises. Parts per sitting as the app draws them.
+  const SITTINGS = ["10","11","12","13","14","·","16","17","18","19","20","·","21","22","23","·","24","25"];
+  const PARTS = [[1,2],[0,1],[1,3],[0,1],[1,2],[1,1],[1,4],[0,1],[0,0],[2,0],[0,1],[1,0],[1,2],[0,1],[0,6],[0,0],[0,10],[0,0]];
+  const bars = document.getElementById("bars"), xl = document.getElementById("xl");
+  bars.innerHTML = PARTS.map(([c, o]) => `<div class="bar"><span class="c" style="height:${c * 10}%"></span><span class="o" style="height:${o * 10}%"></span></div>`).join("");
+  xl.innerHTML = SITTINGS.map((s) => `<span>${s}</span>`).join("");
+  async function play4() {
+    const nums = document.querySelectorAll("#p4 [data-count]");
+    nums.forEach((el) => {
+      const end = +el.dataset.count, from = +(el.dataset.from || 0);
+      tween(1300, (t) => (el.textContent = Math.round(from + (end - from) * t)));
+    });
+    const segs = [...bars.querySelectorAll(".bar")];
+    segs.forEach((b) => b.querySelectorAll("span").forEach((s) => (s.style.transform = "scaleY(0)")));
+    await wait(250);
+    segs.forEach((b, i) => setTimeout(() => {
+      const [c, o] = b.querySelectorAll("span");
+      tween(700, (t) => { c.style.transform = `scaleY(${t})`; o.style.transform = `scaleY(${t})`; });
+    }, reduce ? 0 : i * 45));
+  }
+
+  // 5 · Pinned summary with the appearances scrolling past.
+  const ROWS = [["2024",3,0],["2024",6,0],["2023",3,0],["2022",5,0],["2021",1,1],["2021",3,0],["2021",6,0],["2020 Dec resit",4,1],["2020 Jan",6,0],["2019",1,1],["2017 Aug",6,0],["2016 Sep",2,0],["2016 Sep",3,0],["2016 Sep",4,1],["2014 Aug",1,1],["2014 Aug",2,0],["2014",1,1],["2014",2,0],["2014",6,0],["2013",2,0],["2012",4,1],["2012",6,0],["2011",2,0],["2010",2,0],["2010",4,1]];
+  const SITTING_INDEX = { "2010":0,"2011":1,"2012":2,"2013":3,"2014":4,"2014 Aug":5,"2016 Sep":6,"2017 Aug":7,"2018 Aug":8,"2019":9,"2020 Jan":10,"2020 Dec resit":11,"2021":12,"2022":13,"2023":14,"2023 Jul resit":15,"2024":16,"2025":17 };
+  const list = document.getElementById("list"), mini = document.getElementById("mini"), pinNow = document.getElementById("pinNow"), scroller = document.getElementById("scroller");
+  list.innerHTML = ROWS.map(([s, q, c]) => `<div class="row" data-s="${s}"><span class="y">${s}</span><span class="qn">Question ${q}</span><span class="tag ${c ? "c" : ""}">${c ? "Compulsory" : "Optional"}</span></div>`).join("");
+  mini.innerHTML = PARTS.map(([c, o], i) => `<span data-i="${i}"><b class="c" style="height:${c * 10}%;background:var(--gold)"></b><b class="o" style="height:${o * 10}%;background:var(--bar-opt)"></b></span>`).join("");
+  function markInView() {
+    const top = scroller.getBoundingClientRect().top + (innerWidth <= 760 ? 150 : 40);
+    const row = [...list.children].find((r) => r.getBoundingClientRect().bottom > top) || list.firstElementChild;
+    list.querySelectorAll(".row.on").forEach((r) => r.classList.remove("on"));
+    row.classList.add("on");
+    const i = SITTING_INDEX[row.dataset.s];
+    mini.querySelectorAll("span").forEach((sp) => (sp.style.opacity = +sp.dataset.i === i ? 1 : 0.35));
+    pinNow.textContent = "In view: " + row.dataset.s;
+  }
+  scroller.addEventListener("scroll", markInView, { passive: true });
+  markInView();
+
+  // Each demo plays once when it comes into view; Replay runs it again.
+  const plays = { 1: play1, 2: play2, 3: play3, 4: play4 };
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+    if (!e.isIntersecting) return;
+    const n = e.target.id.slice(1); io.unobserve(e.target); plays[n] && plays[n]();
+  }), { threshold: 0.45 });
+  ["p1", "p2", "p3", "p4"].forEach((id) => io.observe(document.getElementById(id)));
+  document.querySelectorAll("[data-replay]").forEach((b) => b.addEventListener("click", () => plays[b.dataset.replay]()));
+</script>
+</body>
+</html>
