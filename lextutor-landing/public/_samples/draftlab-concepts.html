@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Draft Lab review concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600&family=Source+Sans+3:wght@400;500;600&family=Tinos:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  /* The app's original tokens: black and gold; grey-white and bronze. */
+  :root, :root[data-theme="dark"] { --page:#0f1014; --canvas:#090a0d; --sheet:#15161b; --ink:#f1f0ed; --muted:#aaa9ad; --quiet:#828187; --line:#2b2b31; --signal:#d2b481; --signal-ink:#111114; --soft:rgba(210,180,129,.12); --dim:.22; }
+  :root[data-theme="light"] { --page:#f0f0ed; --canvas:#dedfdd; --sheet:#fbfbf8; --ink:#17171b; --muted:#515258; --quiet:#55565c; --line:#c9c9c3; --signal:#71531f; --signal-ink:#fbfbf8; --soft:rgba(113,83,31,.1); --dim:.28; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--page); color:var(--ink); font-family:"Source Sans 3",system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  .mono { font-family:"IBM Plex Mono",monospace; }
+  .bar { position:sticky; top:0; z-index:30; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:10px clamp(16px,3vw,40px); background:color-mix(in srgb,var(--page) 92%,transparent); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .bar b { font:500 15px "Instrument Sans",sans-serif; letter-spacing:-.01em; }
+  .seg { display:flex; gap:16px; }
+  .seg button { background:none; border:0; padding:6px 0; font:500 10.5px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); cursor:pointer; }
+  .seg button[aria-pressed="true"] { color:var(--ink); box-shadow:inset 0 -1px 0 var(--signal); }
+  .concept { display:none; } .concept.on { display:block; }
+  .intro { max-width:1320px; margin:0 auto; padding:28px clamp(16px,3vw,40px) 6px; }
+  .intro h1 { font:500 clamp(28px,3vw,40px)/1.05 "Instrument Sans",sans-serif; letter-spacing:-.03em; }
+  .intro p { margin-top:8px; max-width:70ch; color:var(--muted); font-size:16px; line-height:1.5; }
+
+  /* The document, shared by every concept */
+  .doc { background:var(--sheet); border:1px solid var(--line); padding:44px 56px 56px; font:15.5px/1.7 "Tinos","Times New Roman",serif; color:var(--ink); }
+  .comp { position:relative; padding:5px 0; transition:opacity .45s ease, background-color .3s ease; }
+  .comp.center { text-align:center; } .comp.right { text-align:right; } .comp.b { font-weight:700; }
+  .comp.u span.t { text-decoration:underline; text-underline-offset:.25em; font-weight:700; }
+  .party { display:flex; justify-content:space-between; }
+  .gapnote { font:500 10.5px/1.4 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--quiet); border:1px dashed var(--line); padding:8px 10px; margin:8px 0; }
+  del.was { text-decoration:none; color:var(--quiet); background:linear-gradient(var(--signal),var(--signal)) no-repeat 0 58%/100% 1px; }
+  ins.now { text-decoration:none; color:var(--signal); }
+
+  /* ── A · Schematic ─────────────────────────────────────────── */
+  .A { max-width:1320px; margin:0 auto; padding:20px clamp(16px,3vw,40px) 120px; display:grid; grid-template-columns:150px minmax(0,640px) 64px minmax(300px,1fr); gap:0; align-items:start; }
+  .A .gut, .A .balloons { position:relative; }
+  .A .bk { position:absolute; right:14px; width:10px; border:1px solid var(--line); border-right:0; transition:border-color .3s ease; }
+  .A .bk span { position:absolute; right:18px; top:50%; transform:translateY(-50%); white-space:nowrap; text-align:right; font:500 10px/1.35 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--quiet); transition:color .3s ease; }
+  .A .bk span i { font-style:normal; display:block; letter-spacing:.06em; }
+  .A .bk.ok span i { color:var(--quiet); } .A .bk.fix span i, .A .bk.on span { color:var(--signal); }
+  .A .bk.on { border-color:var(--signal); }
+  .A .bl { position:absolute; left:0; width:64px; height:1px; background:var(--line); transition:background-color .3s; }
+  .A .bl b { position:absolute; right:-2px; top:-13px; width:26px; height:26px; border-radius:50%; display:grid; place-items:center; font:600 11px "IBM Plex Mono",monospace; border:1px solid var(--line); background:var(--page); color:var(--muted); cursor:pointer; transition:transform .35s cubic-bezier(.34,1.56,.64,1), background-color .3s, border-color .3s, color .3s; }
+  .A .bl.fix b { background:var(--signal); border-color:var(--signal); color:var(--signal-ink); }
+  .A .bl.on { background:var(--signal); } .A .bl.on b { transform:scale(1.18); border-color:var(--signal); }
+  .A .detail { position:sticky; top:84px; padding-left:28px; }
+  .A .detail .k { font:500 10.5px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); }
+  .A .slide { margin-top:18px; border-top:1px solid var(--line); padding-top:22px; }
+  .A .slide .num { font:500 clamp(56px,6vw,96px)/.9 "Instrument Sans",sans-serif; letter-spacing:-.05em; color:var(--quiet); }
+  .A .slide.fix .num { color:var(--signal); }
+  .A .slide h3 { margin-top:14px; font:500 22px/1.15 "Instrument Sans",sans-serif; letter-spacing:-.02em; }
+  .A .slide p { margin-top:12px; font:15.5px/1.6 "Geist",sans-serif; color:var(--ink); }
+  .A .ba { margin-top:18px; display:grid; gap:6px; font:14px/1.5 "Tinos",serif; }
+  .A .ba div { padding:10px 12px; border:1px solid var(--line); }
+  .A .ba div:first-child { color:var(--quiet); text-decoration:line-through; text-decoration-color:var(--signal); }
+  .A .ba div:last-child { border-color:var(--signal); color:var(--ink); }
+  .A .ba small { display:block; font:500 9.5px/1.6 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); text-decoration:none; }
+  .A .steps { margin-top:22px; display:flex; gap:6px; }
+  .A .steps i { width:22px; height:3px; background:var(--line); transition:background-color .3s; } .A .steps i.on { background:var(--signal); }
+  .A .slide { animation:swap .45s cubic-bezier(.2,.7,.2,1); }
+  @keyframes swap { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+
+  /* ── B · Proof index ───────────────────────────────────────── */
+  .B { max-width:1320px; margin:0 auto; padding:20px clamp(16px,3vw,40px) 120px; display:grid; grid-template-columns:280px minmax(0,700px); gap:48px; justify-content:center; align-items:start; }
+  .B .index { position:sticky; top:84px; }
+  .B .index h4 { font:500 10.5px/1 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); padding-bottom:12px; border-bottom:1px solid var(--line); }
+  .B .row { display:grid; grid-template-columns:28px minmax(0,1fr) auto; align-items:center; gap:8px; padding:9px 0; border-bottom:1px solid var(--line); cursor:pointer; color:var(--muted); font-size:14.5px; }
+  .B .row:hover, .B .row.on { color:var(--ink); }
+  .B .row .n { font:500 11px "IBM Plex Mono",monospace; color:var(--quiet); }
+  .B .row.on .n { color:var(--signal); }
+  .B .row .s { font:500 9.5px/1 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; }
+  .tag { display:inline-block; padding:4px 7px; font:600 9.5px/1 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; }
+  .tag.fix { background:var(--signal); color:var(--signal-ink); }
+  .tag.dev { border:1px solid var(--quiet); color:var(--ink); padding:3px 6px; }
+  .tag.ok { color:var(--quiet); padding:4px 0; }
+  .tag.miss { border:1px dashed var(--quiet); color:var(--quiet); padding:3px 6px; }
+  .B .fixblock { margin:10px 0 16px; border:1px solid var(--signal); font-family:"Geist",sans-serif; }
+  .B .fixblock header { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border-bottom:1px solid var(--line); }
+  .B .fixblock .was2, .B .fixblock .now2 { padding:10px 12px; font:14.5px/1.55 "Tinos",serif; }
+  .B .fixblock .was2 { color:var(--quiet); text-decoration:line-through; text-decoration-color:var(--signal); border-bottom:1px dashed var(--line); }
+  .B .fixblock p.why { padding:10px 12px 12px; font-size:14px; line-height:1.55; color:var(--muted); border-top:1px solid var(--line); }
+  .B .devblock { margin:8px 0 14px; padding:10px 0 0; border-top:1px dotted var(--quiet); font:14px/1.55 "Geist",sans-serif; color:var(--muted); }
+  .B .devblock .tag { margin-right:8px; }
+  .B .comp.flash { background:var(--soft); }
+
+  /* ── C · Spotlight ─────────────────────────────────────────── */
+  .C { max-width:1320px; margin:0 auto; padding:20px clamp(16px,3vw,40px) 140px; display:grid; grid-template-columns:minmax(0,680px) minmax(300px,420px); gap:56px; justify-content:center; align-items:start; }
+  .C .doc.lit .comp { opacity:var(--dim); }
+  .C .doc.lit .comp.focus { opacity:1; }
+  .C .doc.lit .comp.focus::before { content:""; position:absolute; left:-28px; top:6px; bottom:6px; width:2px; background:var(--signal); }
+  .C .stage { position:sticky; top:84px; }
+  .C .card { padding:26px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); animation:swap .5s cubic-bezier(.2,.7,.2,1); }
+  .C .card h3 { margin-top:14px; font:500 clamp(24px,2.4vw,32px)/1.12 "Instrument Sans",sans-serif; letter-spacing:-.025em; }
+  .C .card p { margin-top:14px; font:16px/1.6 "Geist",sans-serif; }
+  .C .nav { margin-top:20px; display:flex; align-items:center; gap:14px; }
+  .C .nav button { width:40px; height:40px; background:none; border:1px solid var(--line); color:var(--ink); font:16px "IBM Plex Mono",monospace; cursor:pointer; transition:transform .45s cubic-bezier(.34,1.56,.64,1), border-color .2s; }
+  .C .nav button:hover { border-color:var(--signal); } .C .nav button:active { transform:scale(.92); }
+  .C .nav span { font:500 11px "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); }
+  .C .begin { white-space:nowrap; display:inline-flex; align-items:center; gap:12px; height:46px; padding:0 18px; border:1px solid var(--signal); background:transparent; color:var(--ink); font:500 11px "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; cursor:pointer; }
+  .C .sum { display:flex; gap:18px; margin:14px 0 22px; }
+
+  /* ── Phone levels ──────────────────────────────────────────── */
+  .P { max-width:1320px; margin:0 auto; padding:20px clamp(16px,3vw,40px) 120px; display:flex; gap:40px; flex-wrap:wrap; justify-content:center; }
+  .phone { width:390px; max-width:100%; border:1px solid var(--line); background:var(--page); padding:22px 16px 28px; }
+  .phone .doc { padding:22px 18px 18px; font-size:14px; }
+  .phone .lv { display:flex; gap:8px; flex-wrap:wrap; padding:12px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); margin:14px 0 16px; }
+  .phone .lv button { background:none; border:0; padding:0; cursor:pointer; }
+  .tuck { margin:8px 0 16px; font-family:"Geist",sans-serif; }
+  .tuck.fix { padding:12px 12px 13px; background:var(--signal); color:var(--signal-ink); }
+  .tuck.fix .tl { color:var(--signal-ink); opacity:.75; }
+  .tuck.fix .bw { margin-top:8px; padding-top:8px; border-top:1px solid color-mix(in srgb, var(--signal-ink) 30%, transparent); font:13.5px/1.5 "Tinos",serif; }
+  .tuck.dev { padding:10px 12px; border:1px solid var(--quiet); }
+  .tuck.ok { display:flex; gap:8px; align-items:baseline; padding:2px 0; color:var(--quiet); font-size:12.5px; }
+  .tuck .tl { display:block; font:600 9.5px/1.6 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); }
+  .tuck p { margin-top:4px; font-size:14px; line-height:1.5; }
+  /* Phone · tap to view. A tag ends each part with a note; the note unfolds under the part when tapped. */
+  .mk { position:relative; display:inline-grid; place-items:center; min-width:22px; height:22px; margin-left:6px; padding:0 5px; vertical-align:2px; overflow:hidden; cursor:pointer;
+        font:600 11px/1 "IBM Plex Mono",monospace; border:1px solid var(--quiet); background:transparent; color:var(--ink); transition:transform .35s cubic-bezier(.34,1.56,.64,1), background-color .2s, color .2s; }
+  .mk.fix { background:var(--signal); border-color:var(--signal); color:var(--signal-ink); }
+  .mk[aria-expanded="true"] { transform:scale(.92); }
+  .mk.dev[aria-expanded="true"] { background:var(--ink); color:var(--page); border-color:var(--ink); }
+  .mk::after { content:""; position:absolute; top:0; bottom:0; left:-60%; width:50%; background:linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); opacity:0; }
+  .mk.invite { animation:mk-pop .7s cubic-bezier(.34,1.56,.64,1) .35s 1; }
+  .mk.invite::after { animation:mk-run .9s ease .2s 1; }
+  @keyframes mk-pop { 0%,100% { transform:scale(1); } 40% { transform:scale(1.22); } }
+  @keyframes mk-run { 0% { left:-60%; opacity:1; } 100% { left:120%; opacity:0; } }
+  .trace { background-image:linear-gradient(color-mix(in srgb, var(--signal) 55%, transparent), color-mix(in srgb, var(--signal) 55%, transparent)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1px; }
+  .trace.dev { background-image:linear-gradient(var(--quiet), var(--quiet)); }
+  .trace.drawn { background-size:100% 1px; transition:background-size 1s cubic-bezier(.65,0,.35,1); }
+  .fold { display:grid; grid-template-rows:0fr; transition:grid-template-rows .45s cubic-bezier(.2,.7,.2,1); }
+  .fold > div { overflow:hidden; }
+  .fold.open { grid-template-rows:1fr; }
+  .fold .tuck { margin:10px 0 14px; opacity:0; transform:translateY(-6px); transition:opacity .3s ease .12s, transform .4s cubic-bezier(.2,.7,.2,1) .1s; }
+  .fold.open .tuck { opacity:1; transform:none; }
+  .phone .hint-line { margin-top:10px; font:500 10px/1.5 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--quiet); }
+  /* Phone · the review in three figures: numerals that count once, a proportion bar that draws once. */
+  .strip { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); margin-top:18px; border-top:1px solid var(--line); }
+  .strip .cell { position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:6px; padding:14px 0 12px 12px; background:none; border:0; border-left:1px solid var(--line); color:var(--ink); text-align:left; cursor:pointer; font:inherit; transition:background-color .2s ease; }
+  .strip .cell:first-child { border-left:0; padding-left:0; }
+  .strip .cell.ok { cursor:default; }
+  .strip .cell b { font:500 40px/0.9 "Instrument Sans",sans-serif; letter-spacing:-.05em; font-variant-numeric:tabular-nums; }
+  .strip .cell.fix b { color:var(--signal); }
+  .strip .cell.ok b { color:var(--quiet); }
+  .strip .cell span { font:500 9.5px/1.35 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); }
+  .strip .cell .go { position:absolute; right:8px; top:14px; color:var(--quiet); font:14px/1 "IBM Plex Mono",monospace; }
+  .strip .cell.fix .go { color:var(--signal); }
+  .strip .cell:active { background:var(--soft); }
+  .strip.live .cell .go { animation:go-nod 1.3s cubic-bezier(.34,1.56,.64,1) 1.2s 2; }
+  @keyframes go-nod { 0%,100% { transform:translateY(0); } 30% { transform:translateY(4px); } 60% { transform:translateY(0); } }
+  .spread { display:flex; gap:3px; height:6px; margin:4px 0 6px; }
+  .spread i { flex:1; transform-origin:left; transform:scaleX(0); transition:transform .5s cubic-bezier(.65,0,.35,1); }
+  .spread i.fix { background:var(--signal); }
+  .spread i.dev { border:1px solid var(--ink); }
+  .spread i.ok { background:var(--line); }
+  .spread.live i { transform:scaleX(1); }
+  @media (prefers-reduced-motion: reduce) { .spread i { transform:none; } }
+  .legend { max-width:380px; }
+  .legend h3 { font:500 22px/1.15 "Instrument Sans",sans-serif; letter-spacing:-.02em; }
+  .legend p { margin-top:10px; color:var(--muted); font-size:15.5px; line-height:1.55; }
+  .legend ul { margin-top:16px; padding:0; list-style:none; }
+  .legend li { display:grid; grid-template-columns:130px 1fr; gap:12px; padding:12px 0; border-top:1px solid var(--line); font-size:14.5px; color:var(--muted); align-items:center; }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>Draft Lab review · concepts</b>
+  <div class="seg" role="group" aria-label="Concept">
+    <button type="button" data-c="A" aria-pressed="true">A · Schematic</button>
+    <button type="button" data-c="B" aria-pressed="false">B · Proof index</button>
+    <button type="button" data-c="C" aria-pressed="false">C · Spotlight</button>
+    <button type="button" data-c="P" aria-pressed="false">Phone · levels</button>
+  </div>
+  <div class="seg" role="group" aria-label="Theme">
+    <button type="button" data-t="dark" aria-pressed="true">Dark</button>
+    <button type="button" data-t="light" aria-pressed="false">Light</button>
+  </div>
+</div>
+
+<section class="concept on" id="cA">
+  <div class="intro"><h1>A · Schematic</h1><p>The draft annotated like a technical drawing. Every component carries a dimension bracket with its name and status; notes are numbered balloons. One large panel shows the note you are on and changes as you scroll or touch a balloon. Nothing stacks.</p></div>
+  <div class="A">
+    <div class="gut" id="Agut"></div>
+    <div class="doc" id="Adoc"></div>
+    <div class="balloons" id="Abl"></div>
+    <div class="detail"><span class="k">Lexa · Sound · 1 to correct · 2 to strengthen</span><div id="Aslide"></div></div>
+  </div>
+</section>
+
+<section class="concept" id="cB">
+  <div class="intro"><h1>B · Proof index</h1><p>A live index of all thirteen components beside the page, each with its status. Touch a row to go to it. Corrections open inside the document as before and after, with the reason under them.</p></div>
+  <div class="B">
+    <aside class="index"><h4>13 components · 1 to correct · 2 to strengthen</h4><div id="Bidx"></div></aside>
+    <div class="doc" id="Bdoc"></div>
+  </div>
+</section>
+
+<section class="concept" id="cC">
+  <div class="intro"><h1>C · Spotlight</h1><p>A guided review. The page dims and the part under review lights; its note stands beside it. Step with the arrows or the arrow keys; the review feels like a walk-through with a partner.</p></div>
+  <div class="C">
+    <div class="doc" id="Cdoc"></div>
+    <div class="stage" id="Cstage"></div>
+  </div>
+</section>
+
+<section class="concept" id="cP">
+  <div class="intro"><h1>Phone · tap to view</h1><p>The page stays clean. Each part with a note ends in a mark: solid for a correction, outlined for a point to strengthen. A mark invites the tap once as it comes into view, and the note unfolds under its part when tapped. The counts at the top take you to the first of each.</p></div>
+  <div class="P">
+    <div class="phone" id="Pphone"></div>
+    <div class="legend">
+      <h3>The three levels</h3>
+      <p>Each says what it is in words and in form, so it reads at a glance and in grey-scale.</p>
+      <ul>
+        <li><span class="tag fix">01 Correct</span><span>Must change. Solid block with the words to write.</span></li>
+        <li><span class="tag dev">02 Strengthen</span><span>Should improve. Outlined box, the advice inside.</span></li>
+        <li><span class="tag ok">✓ Well drafted</span><span>Fine as it is. A quiet tick, one line.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<script>
+  // The real review of 28 October: thirteen components, one correction, two to strengthen.
+  const C = [
+    { k:"heading", name:"Heading", cls:"center b", html:"IN THE HIGH COURT OF LAGOS STATE", st:"ok" },
+    { k:"division", name:"Judicial division", cls:"center b", html:"IN THE LAGOS JUDICIAL DIVISION", st:"ok", good:"Names the judicial division, as the form requires." },
+    { k:"holden", name:"Holden at", cls:"center b", html:"HOLDEN AT LAGOS", st:"ok", good:"Lagos is a seat of the division named." },
+    { k:"suit", name:"Suit number", cls:"right", html:"SUIT NO: LD/4192GCM/2025", st:"ok", good:"Carried from the originating process." },
+    { k:"parties", name:"Parties", cls:"", html:'BETWEEN:<div class="party"><span>CROWNFIELD PROPERTIES LTD</span><span>CLAIMANT/APPLICANT</span></div>AND<div class="party"><span>APEX LOGISTICS NIGERIA PLC</span><span>DEFENDANT/RESPONDENT</span></div>', st:"ok", good:"Each party is given its capacity." },
+    { k:"title", name:"Process title", cls:"center u", html:'<span class="t">MOTION ON NOTICE</span>', st:"ok" },
+    { k:"authority", name:"Authority clause", cls:"", html:'BROUGHT PURSUANT TO THE INHERENT JURISDICTION OF THIS COURT ONLY', st:"fix", n:1,
+      before:"BROUGHT PURSUANT TO THE INHERENT JURISDICTION OF THIS COURT ONLY",
+      after:"BROUGHT PURSUANT TO ORDER 43 RULE 1 OF THE HIGH COURT OF LAGOS STATE (CIVIL PROCEDURE) RULES 2019 AND UNDER THE INHERENT JURISDICTION OF THIS HONOURABLE COURT",
+      title:"Name the rule that gives the court its power", note:"The inherent jurisdiction alone cannot ground an interlocutory injunction. Order 43 Rule 1(1), Lagos 2019: a motion must state the Rule of Court or Law under which it is brought." },
+    { k:"opening", name:"Opening clause", cls:"", html:"TAKE NOTICE that this Honourable Court will be moved on Tuesday the 14th day of October 2025 at the hour of 9 o'clock in the forenoon or so soon thereafter as Counsel on behalf of the Claimant/Applicant may be heard praying the Court for the following orders:", st:"ok", good:"Follows the usual words of motion practice." },
+    { k:"reliefs", name:"Reliefs", cls:"", html:"1. AN ORDER of interlocutory injunction restraining the Defendant/Respondent, its agents and privies from selling the property at No. 12 Akin Adesola Street, Victoria Island, Lagos.<br>2. Such further orders as this Honourable Court may deem fit to make in the circumstances.", st:"dev", n:2,
+      title:"Pray for an order the registry can draw up", note:"Restrain the Respondent, by itself, its agents, privies and assigns, from selling, transferring, leasing or otherwise parting with possession of the property, pending the hearing and determination of this suit." },
+    { k:"grounds", name:"Grounds", cls:"", html:'<div class="gapnote">Optional · not included: grounds</div>', st:"miss" },
+    { k:"date", name:"Date", cls:"", html:"Dated this 3rd day of October 2025.", st:"ok" },
+    { k:"counsel", name:"Counsel", cls:"", html:"A. P. Obembe, Esq.<br>Counsel to the Claimant/Applicant<br>Victoria Island, Lagos", st:"ok" },
+    { k:"service", name:"For service on", cls:"", html:"FOR SERVICE ON:<br>The Defendant/Respondent", st:"dev", n:3,
+      title:"Give the bailiff an address", note:"Name the Respondent and give an address at which service can be effected; as it stands, the bailiff has nothing to act on." },
+  ];
+  const notes = C.filter((c) => c.n);
+  const glyph = { ok:"✓", fix:"✕", dev:"~", miss:"–" };
+  const word = { ok:"Well drafted", fix:"Correct", dev:"Strengthen", miss:"Not included" };
+  const docHTML = (opt = {}) => C.map((c, i) => `<div class="comp ${c.cls}" data-k="${c.k}" data-i="${i}">${opt.after && c.after ? `<del class="was">${c.before}</del> <ins class="now">${c.after}</ins>` : c.html}</div>`).join("");
+
+  // Theme and concept switches
+  document.querySelectorAll("[data-t]").forEach((b) => b.onclick = () => { document.documentElement.dataset.theme = b.dataset.t; document.querySelectorAll("[data-t]").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); layoutA(); });
+  document.querySelectorAll("[data-c]").forEach((b) => b.onclick = () => { document.querySelectorAll(".concept").forEach((s) => s.classList.toggle("on", s.id === "c" + b.dataset.c)); document.querySelectorAll("[data-c]").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); window.scrollTo(0, 0); requestAnimationFrame(layoutA); });
+
+  // A · Schematic
+  const Adoc = document.getElementById("Adoc"); Adoc.innerHTML = docHTML({ after:true });
+  const Agut = document.getElementById("Agut"), Abl = document.getElementById("Abl"), Aslide = document.getElementById("Aslide");
+  let Aactive = 1;
+  function slide(n) {
+    const c = notes.find((x) => x.n === n); Aactive = n;
+    Aslide.innerHTML = `<div class="slide ${c.st}"><div class="num">0${c.n}</div><span class="tag ${c.st}" style="margin-top:14px">${word[c.st]} · ${c.name}</span><h3>${c.title}</h3><p>${c.note}</p>` +
+      (c.after ? `<div class="ba"><div><small>As drafted</small>${c.before}</div><div><small>Write</small>${c.after}</div></div>` : "") +
+      `<div class="steps">${notes.map((x) => `<i class="${x.n === n ? "on" : ""}"></i>`).join("")}</div></div>`;
+    Agut.querySelectorAll(".bk").forEach((b) => b.classList.toggle("on", +b.dataset.n === n));
+    Abl.querySelectorAll(".bl").forEach((b) => b.classList.toggle("on", +b.dataset.n === n));
+  }
+  function layoutA() {
+    if (!document.getElementById("cA").classList.contains("on")) return;
+    const top = Adoc.getBoundingClientRect().top;
+    Agut.innerHTML = ""; Abl.innerHTML = "";
+    Adoc.querySelectorAll(".comp").forEach((el) => {
+      const c = C[+el.dataset.i], r = el.getBoundingClientRect();
+      const bk = document.createElement("div");
+      bk.className = "bk " + c.st; bk.dataset.n = c.n || "";
+      bk.style.top = (r.top - top + 4) + "px"; bk.style.height = Math.max(10, r.height - 8) + "px";
+      bk.innerHTML = `<span>${String(+el.dataset.i + 1).padStart(2, "0")} ${c.name}<i>${glyph[c.st]} ${word[c.st]}</i></span>`;
+      Agut.appendChild(bk);
+      if (c.n) {
+        const bl = document.createElement("div");
+        bl.className = "bl " + c.st; bl.dataset.n = c.n; bl.style.top = (r.top - top + 16) + "px";
+        bl.innerHTML = `<b>${c.n}</b>`; bl.querySelector("b").onclick = () => slide(c.n);
+        Abl.appendChild(bl);
+      }
+    });
+    Agut.style.height = Abl.style.height = Adoc.offsetHeight + "px";
+    slide(Aactive);
+  }
+  // Scroll moves the panel to the note in view
+  const Aio = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { const c = C[+e.target.dataset.i]; if (c.n && c.n !== Aactive) slide(c.n); } }), { rootMargin: "-40% 0px -45% 0px" });
+  Adoc.querySelectorAll(".comp").forEach((el) => { if (C[+el.dataset.i].n) Aio.observe(el); });
+  addEventListener("resize", layoutA); document.fonts && document.fonts.ready.then(layoutA); layoutA();
+
+  // B · Proof index
+  const Bdoc = document.getElementById("Bdoc");
+  Bdoc.innerHTML = C.map((c, i) => `<div class="comp ${c.cls}" data-k="${c.k}" id="B-${c.k}">${c.html}</div>` +
+    (c.st === "fix" ? `<div class="fixblock"><header><span class="tag fix">0${c.n} Correct · ${c.name}</span><span class="tag ok">Lagos 2019</span></header><div class="was2">${c.before}</div><div class="now2">${c.after}</div><p class="why">${c.note}</p></div>` : "") +
+    (c.st === "dev" ? `<div class="devblock"><span class="tag dev">0${c.n} Strengthen</span>${c.note}</div>` : "")).join("");
+  document.getElementById("Bidx").innerHTML = C.map((c, i) => `<div class="row" data-k="${c.k}"><span class="n">${String(i + 1).padStart(2, "0")}</span><span>${c.name}</span><span class="tag ${c.st}">${c.st === "fix" ? "Correct" : c.st === "dev" ? "Strengthen" : c.st === "miss" ? "Optional" : "✓"}</span></div>`).join("");
+  document.querySelectorAll("#Bidx .row").forEach((r) => r.onclick = () => {
+    const el = document.getElementById("B-" + r.dataset.k); el.scrollIntoView({ behavior:"smooth", block:"center" });
+    el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1400);
+  });
+  const Bio = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) document.querySelectorAll("#Bidx .row").forEach((r) => r.classList.toggle("on", r.dataset.k === e.target.dataset.k)); }), { rootMargin: "-45% 0px -50% 0px" });
+  Bdoc.querySelectorAll(".comp").forEach((el) => Bio.observe(el));
+
+  // C · Spotlight
+  const Cdoc = document.getElementById("Cdoc"); Cdoc.innerHTML = docHTML({ after:true });
+  const Cstage = document.getElementById("Cstage"); let Ci = -1;
+  function Cshow(i) {
+    Ci = i; const c = notes[i];
+    Cdoc.classList.add("lit");
+    Cdoc.querySelectorAll(".comp").forEach((el) => el.classList.toggle("focus", C[+el.dataset.i].n === c.n));
+    Cdoc.querySelector(".comp.focus").scrollIntoView({ behavior:"smooth", block:"center" });
+    Cstage.innerHTML = `<div class="card"><span class="tag ${c.st}">0${c.n} ${word[c.st]} · ${c.name}</span><h3>${c.title}</h3><p>${c.note}</p></div><div class="nav"><button type="button" id="Cp" aria-label="Previous">‹</button><span>${i + 1} of ${notes.length}</span><button type="button" id="Cn" aria-label="Next">›</button><button type="button" id="Cx" class="begin" style="height:40px;margin-left:auto">See the whole draft</button></div>`;
+    document.getElementById("Cp").onclick = () => Cshow((i - 1 + notes.length) % notes.length);
+    document.getElementById("Cn").onclick = () => Cshow((i + 1) % notes.length);
+    document.getElementById("Cx").onclick = Cintro;
+  }
+  function Cintro() {
+    Ci = -1; Cdoc.classList.remove("lit"); Cdoc.querySelectorAll(".focus").forEach((x) => x.classList.remove("focus"));
+    Cstage.innerHTML = `<div class="card"><span class="tag ok">Lexa · Sound</span><h3>One correction and two points to strengthen.</h3><div class="sum"><span class="tag fix">1 Correct</span><span class="tag dev">2 Strengthen</span><span class="tag ok">✓ 5 well drafted</span></div><button type="button" class="begin" id="Cb">Walk through the review →</button></div>`;
+    document.getElementById("Cb").onclick = () => Cshow(0);
+  }
+  addEventListener("keydown", (e) => { if (!document.getElementById("cC").classList.contains("on") || Ci < 0) return; if (e.key === "ArrowRight") Cshow((Ci + 1) % notes.length); if (e.key === "ArrowLeft") Cshow((Ci - 1 + notes.length) % notes.length); if (e.key === "Escape") Cintro(); });
+  Cintro();
+
+  // Phone · tap to view. Each part with a note ends in a tag; a tap unfolds the note under the part, one at a time.
+  // Each tag invites the tap once as it first comes into view: the words' trace draws, a light runs the tag, it bounces.
+  const P = document.getElementById("Pphone");
+  const wrapWords = (c) => c.st === "fix"
+    ? `<span class="trace" data-trace="${c.n}"><del class="was">${c.before}</del> <ins class="now">${c.after}</ins></span>`
+    : `<span class="trace dev" data-trace="${c.n}">${c.html}</span>`;
+  P.innerHTML = `<div style="font:500 26px/1.05 'Instrument Sans',sans-serif;letter-spacing:-.03em">Motion on Notice</div>
+    <div class="strip" id="strip">
+      <button type="button" class="cell fix" data-go="1"><b data-count="1">0</b><span>to correct</span><i class="go" aria-hidden="true">↓</i></button>
+      <button type="button" class="cell dev" data-go="2"><b data-count="2">0</b><span>to strengthen</span><i class="go" aria-hidden="true">↓</i></button>
+      <div class="cell ok"><b data-count="5">0</b><span>well drafted</span></div>
+    </div>
+    <div class="spread" id="spread" aria-hidden="true"><i class="fix"></i><i class="dev"></i><i class="dev"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i><i class="ok"></i></div>
+    <p class="hint-line">Tap a mark to read Lexa's note</p>
+    <div class="doc" style="margin-top:12px">` + C.map((c) => {
+      if (!c.n) return `<div class="comp ${c.cls}">${c.html}</div>`;
+      const tag = `<button type="button" class="mk ${c.st}" data-n="${c.n}" aria-expanded="false" aria-controls="fold-${c.n}" aria-label="${word[c.st]}: note ${c.n} on ${c.name}">${c.n}</button>`;
+      const tuck = c.st === "fix"
+        ? `<div class="tuck fix"><span class="tl">0${c.n} Correct · ${c.name}</span><p>${c.note}</p></div>`
+        : `<div class="tuck dev"><span class="tl">0${c.n} Strengthen · ${c.name}</span><p>${c.note}</p></div>`;
+      return `<div class="comp ${c.cls}" id="P-${c.n}">${wrapWords(c)}${tag}</div><div class="fold" id="fold-${c.n}"><div>${tuck}</div></div>`;
+    }).join("") + `</div>`;
+  const marks = Array.from(P.querySelectorAll(".mk"));
+  function toggle(n, force) {
+    marks.forEach((m) => {
+      const open = +m.dataset.n === n ? (force ?? m.getAttribute("aria-expanded") !== "true") : false;
+      m.setAttribute("aria-expanded", String(open));
+      document.getElementById("fold-" + m.dataset.n).classList.toggle("open", open);
+    });
+  }
+  marks.forEach((m) => m.onclick = () => toggle(+m.dataset.n));
+  P.querySelectorAll("[data-go]").forEach((b) => b.onclick = () => {
+    const n = +b.dataset.go;
+    document.getElementById("P-" + n).scrollIntoView({ behavior:"smooth", block:"center" });
+    setTimeout(() => toggle(n, true), 420);
+  });
+  // The figures count up once and the bar draws in, segment by segment, the first time the review is seen.
+  (function figures() {
+    const strip = document.getElementById("strip"), spread = document.getElementById("spread");
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const run = () => {
+      strip.querySelectorAll("[data-count]").forEach((el) => {
+        const end = +el.dataset.count; if (reduce) { el.textContent = end; return; }
+        const t0 = performance.now(); const k = (n) => { const t = Math.min(1, (n - t0) / 900); el.textContent = Math.round(end * (1 - Math.pow(1 - t, 3))); if (t < 1) requestAnimationFrame(k); }; requestAnimationFrame(k);
+      });
+      spread.querySelectorAll("i").forEach((seg, i) => (seg.style.transitionDelay = (reduce ? 0 : 120 + i * 70) + "ms"));
+      spread.classList.add("live"); strip.classList.add("live");
+    };
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); run(); } });
+    io.observe(strip);
+  })();
+  const invite = new IntersectionObserver((es) => es.forEach((e) => {
+    if (!e.isIntersecting) return;
+    invite.unobserve(e.target);
+    const n = e.target.dataset.n;
+    P.querySelector(`[data-trace="${n}"]`)?.classList.add("drawn");
+    e.target.classList.add("invite");
+  }), { rootMargin: "0px 0px -20% 0px" });
+  marks.forEach((m) => invite.observe(m));
+</script>
+</body>
+</html>

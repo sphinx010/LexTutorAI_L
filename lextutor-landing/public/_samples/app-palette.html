@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LexTutor app palette</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&family=Source+Sans+3:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing:border-box; margin:0; }
+  body { background:#0b0b0c; color:#eee; font-family:"Source Sans 3",system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:1320px; margin:0 auto; padding:0 clamp(16px,4vw,48px); }
+  header { padding:clamp(40px,6vw,72px) 0 12px; }
+  h1 { font-family:"Instrument Sans",sans-serif; font-weight:500; font-size:clamp(32px,4.4vw,56px); line-height:1; letter-spacing:-.04em; }
+  h1 span { display:block; font-size:.5625em; letter-spacing:-.02em; margin-bottom:.2em; color:#bbb; }
+  header p { margin-top:16px; max-width:66ch; font-size:16.5px; line-height:1.55; color:#a9a9a9; }
+  .label { font:500 11px/1.5 "IBM Plex Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:#8d8d8d; }
+  .tabs { position:sticky; top:0; z-index:5; display:flex; gap:6px; margin-top:28px; padding:10px 0; background:rgba(11,11,12,.9); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid #222; overflow-x:auto; }
+  .tabs button { flex:none; background:none; border:1px solid #2a2a2e; color:#9a9a9a; padding:9px 14px; font:500 11px/1 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; }
+  .tabs button[aria-pressed="true"] { color:#fff; border-color:#d2b481; }
+  section { padding:40px 0 24px; }
+  section h2 { font-family:"Instrument Sans",sans-serif; font-weight:500; font-size:26px; letter-spacing:-.02em; }
+  section h2 small { margin-left:10px; font:500 11px "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:#8d8d8d; }
+  .cmp { position:relative; margin-top:16px; aspect-ratio:1440/900; overflow:hidden; border:1px solid #2a2a2e; cursor:ew-resize; touch-action:pan-y; user-select:none; --x:50%; }
+  .cmp img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
+  .cmp .after { clip-path:inset(0 0 0 var(--x)); }
+  .cmp .handle { position:absolute; top:0; bottom:0; left:var(--x); width:0; border-left:1px solid #fff; box-shadow:0 0 0 1px rgba(0,0,0,.3); }
+  .cmp .handle::after { content:"‹ ›"; position:absolute; top:50%; left:0; transform:translate(-50%,-50%); width:44px; height:44px; display:grid; place-items:center; background:#0b0b0c; border:1px solid #fff; color:#fff; font:500 14px "IBM Plex Mono",monospace; letter-spacing:.1em; }
+  .cmp .tag { position:absolute; top:12px; padding:6px 9px; background:rgba(0,0,0,.72); color:#fff; font:500 10.5px/1 "IBM Plex Mono",monospace; letter-spacing:.12em; text-transform:uppercase; }
+  .cmp .tag.l { left:12px; } .cmp .tag.r { right:12px; }
+  .cmp input { position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:ew-resize; margin:0; }
+  .gaps { margin:56px 0 96px; padding-top:24px; border-top:1px solid #222; }
+  .gaps ul { margin-top:14px; padding:0; list-style:none; }
+  .gaps li { padding:12px 0; border-bottom:1px solid #222; font-size:16px; line-height:1.5; color:#b5b5b5; }
+  .gaps li b { color:#fff; font-weight:500; }
+  .sw { display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:12px; font:500 11px "IBM Plex Mono",monospace; color:#9a9a9a; }
+  .sw i { display:inline-block; width:13px; height:13px; vertical-align:-2px; margin-right:6px; border:1px solid #444; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span>The real app, repainted</span>Dark candidates, and bone.</h1>
+    <p>These are live LexTutor screens with only the app's own colour tokens swapped in the browser; no file was changed. Drag the bar to compare today with the candidate. Dark becomes racing green with brass as the signal; light becomes bone with oxblood as the signal.</p>
+    <div class="sw">
+      <span><i style="background:#0b2620"></i>green page #0B2620</span><span><i style="background:#0f2f28"></i>green surface #0F2F28</span><span><i style="background:#d6b780"></i>brass #D6B780</span>
+      <span><i style="background:#efe8dc"></i>bone page #EFE8DC</span><span><i style="background:#f8f3ea"></i>bone surface #F8F3EA</span><span><i style="background:#7a1622"></i>oxblood #7A1622</span><span><i style="background:#2a0b10"></i>ink #2A0B10</span>
+    </div>
+    <div class="tabs" role="group" aria-label="Theme">
+      <button type="button" data-set="dark" aria-pressed="true">Dark → Racing green</button>
+      <button type="button" data-set="ember-gold" aria-pressed="false">Dark → Ember + gold</button>
+      <button type="button" data-set="ember-peach" aria-pressed="false">Dark → Ember + peach</button>
+      <button type="button" data-set="light" aria-pressed="false">Light → Bone (chosen)</button>
+    </div>
+  </header>
+
+  <div id="list"></div>
+
+  <div class="gaps">
+    <p class="label">What a real repaint also needs</p>
+    <ul>
+      <li><b>The top bar and side rail</b> are painted outside the colour tokens, so they stay near-black on green and white on bone here. A repaint brings them onto the tokens.</li>
+      <li><b>Optional columns in the graph</b> stay neutral grey; on green they would take a green-grey so the gold reads cleaner.</li>
+      <li><b>The engraved plates</b> on the home and workspace covers are drawn for black and paper; they would need green and bone grounds (or the founder's newer art).</li>
+      <li><b>Lexa's marks</b> (strike, insert, develop, good) would be re-tuned and contrast-checked on each ground before shipping.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  const SCREENS = [
+    ["home", "Home"],
+    ["question", "Question room", "2025 Question 3"],
+    ["topic", "Topic Drilldown", "Interlocutory Applications"],
+    ["draft", "Draft Lab", "Process library"],
+  ];
+  const list = document.getElementById("list");
+  function render(mode) {
+    const MODES = {
+      dark: ["dark-today", "dark-green", "Today", "Racing green"],
+      "ember-gold": ["dark-today", "dark-ember-gold", "Today", "Ember + gold"],
+      "ember-peach": ["dark-today", "dark-ember-peach", "Today", "Ember + peach"],
+      light: ["light-today", "light-bone", "Today", "Bone"],
+    };
+    const [a, b, la, lb] = MODES[mode];
+    list.innerHTML = SCREENS.map(([k, name, sub]) => `
+      <section>
+        <h2>${name}${sub ? `<small>${sub}</small>` : ""}</h2>
+        <div class="cmp">
+          <img src="pal/${k}-${a}.webp" alt="${name}, today" loading="lazy" />
+          <img class="after" src="pal/${k}-${b}.webp" alt="${name}, ${lb}" loading="lazy" />
+          <span class="handle" aria-hidden="true"></span>
+          <span class="tag l">${la}</span><span class="tag r">${lb}</span>
+          <input type="range" min="0" max="100" value="50" aria-label="Compare ${name}: today and ${lb}" />
+        </div>
+      </section>`).join("");
+    list.querySelectorAll(".cmp").forEach((c) => {
+      const r = c.querySelector("input");
+      r.addEventListener("input", () => c.style.setProperty("--x", r.value + "%"));
+    });
+  }
+  document.querySelectorAll("[data-set]").forEach((btn) => btn.addEventListener("click", () => {
+    document.querySelectorAll("[data-set]").forEach((x) => x.setAttribute("aria-pressed", String(x === btn)));
+    render(btn.dataset.set);
+  }));
+  render("dark");
+</script>
+</body>
+</html>

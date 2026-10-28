@@ -68,14 +68,14 @@ export default function Hero() {
             <span />
             <span />
             <span />
-            <em>LexTutor · Paper Practice · 2025 Question 3</em>
+            <em>LexTutor · Home</em>
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/landing/app-question.webp"
+            src="/landing/app-home.webp"
             width={2880}
             height={1800}
-            alt="LexTutor's question room: the 2025 Question 3 scenario on summary judgment beside the answer page for part (a)."
+            alt="LexTutor's home: an engraved colonnade under the line 'Train the judgment the exam demands', with Start a paper between the middle pillars."
             fetchPriority="high"
           />
         </div>
