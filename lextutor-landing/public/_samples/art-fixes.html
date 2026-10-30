@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Art fixes · scratch pad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root { --page:#0f1014; --raise:#15161b; --ink:#f1f0ed; --muted:#9a9aa3; --quiet:#6c6c75; --line:#2b2b31; --gold:#c8a56a; }
+:root[data-theme="light"] { --page:#f3f3ef; --raise:#fbfbf8; --ink:#1c1c21; --muted:#5d5d66; --quiet:#8a8a92; --line:#dcdcd5; --gold:#7a5a24; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--page); color:var(--ink); font:15px/1.55 Geist, system-ui, sans-serif; }
+.wrap { max-width:1180px; margin:0 auto; padding:40px 16px 96px; }
+header { display:flex; flex-wrap:wrap; align-items:end; justify-content:space-between; gap:16px; border-bottom:1px solid var(--line); padding-bottom:20px; }
+h1 { margin:0; font-weight:500; font-size:clamp(26px,3vw,36px); letter-spacing:-.02em; }
+.lede { margin:8px 0 0; color:var(--muted); max-width:62ch; }
+.mono { font:500 10.5px/1.6 "JetBrains Mono", monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--quiet); }
+.seg { display:inline-flex; border:1px solid var(--line); }
+.seg button { background:none; border:0; padding:8px 14px; color:var(--muted); font:500 10.5px/1 "JetBrains Mono", monospace; letter-spacing:.14em; text-transform:uppercase; cursor:pointer; }
+.seg button[aria-pressed="true"] { color:var(--ink); background:color-mix(in srgb, var(--ink) 8%, transparent); }
+section { padding:44px 0 8px; border-bottom:1px solid var(--line); }
+section h2 { margin:6px 0 4px; font-weight:500; font-size:22px; letter-spacing:-.015em; }
+section p.why { margin:0 0 18px; color:var(--muted); max-width:70ch; }
+.pair { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.pair figure { margin:0; }
+.pair img { display:block; width:100%; height:auto; border:1px solid var(--line); }
+.pair figcaption { margin-top:8px; }
+.pair figcaption b { color:var(--gold); font-weight:500; }
+@media (max-width: 760px) { .pair { grid-template-columns:1fr; } }
+/* The board, drawn in code */
+.boards { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media (max-width: 760px) { .boards { grid-template-columns:1fr; } }
+.stage { position:relative; padding:28px; border:1px solid var(--line); background:var(--raise); display:grid; place-items:center; }
+.stage.dark { --sq-a:#1d1e24; --sq-b:#15161b; --pc-w:#ece6d8; --pc-b:#8b8b95; --gold:#c8a56a; --line:#2b2b31; background:#15161b; }
+.stage.light { --sq-a:#fbfbf8; --sq-b:#ecebe5; --pc-w:#ffffff; --pc-b:#26262c; --gold:#7a5a24; --line:#dcdcd5; background:#fbfbf8; }
+.board { position:relative; width:min(380px, 100%); aspect-ratio:1; container-type:inline-size; display:grid; grid-template-columns:repeat(8,1fr); border:1px solid var(--line); }
+.board i { background:var(--sq-a); }
+.board i.d { background:var(--sq-b); }
+.board .pc { position:absolute; width:12.5%; height:12.5%; display:grid; place-items:center; font:9.6cqi/1 "Segoe UI Symbol", "Noto Sans Symbols 2", serif; transition: transform .9s cubic-bezier(.2,.7,.2,1), opacity .4s ease .55s; user-select:none; }
+.board .pc.w { color:var(--pc-w); -webkit-text-stroke: 1px var(--pc-b); }
+.board .pc.b { color:var(--pc-b); }
+.stage.dark .board .pc.w { -webkit-text-stroke: 0; }
+.board .pc.actor { color:var(--gold); -webkit-text-stroke:0; }
+.board svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
+.board .arrow { stroke:var(--gold); stroke-width:2.2; fill:none; stroke-linecap:round; stroke-dasharray:var(--len); stroke-dashoffset:var(--len); transition: stroke-dashoffset .8s cubic-bezier(.2,.7,.2,1); }
+.board .head { fill:var(--gold); opacity:0; transition: opacity .2s ease .7s; }
+.board .mate { fill:none; stroke:var(--gold); stroke-width:1.6; opacity:0; transition: opacity .4s ease 1.05s; }
+.board.played .arrow { stroke-dashoffset:0; }
+.board.played .head, .board.played .mate { opacity:1; }
+.board.played .pc.taken { opacity:0; }
+.replay { position:absolute; right:12px; bottom:10px; background:none; border:0; border-bottom:1px dotted var(--quiet); color:var(--quiet); font:500 10px/1 "JetBrains Mono", monospace; letter-spacing:.14em; text-transform:uppercase; padding:0 0 2px; cursor:pointer; }
+.cap { margin:10px 0 0; }
+.board i { position:relative; }
+.board i::after { content:""; position:absolute; inset:0; background:var(--gold); opacity:0; transition:opacity 1.4s ease; }
+.board i.from::after { opacity:.26; transition:opacity .35s ease; }
+.board i.from.gone::after { opacity:0; transition:opacity .9s ease; }
+.board i.to::after, .board i.line::after { opacity:.16; transition:opacity .35s ease; }
+.board i.king::after { opacity:.3; transition:opacity .6s ease; }
+.board i.king { box-shadow: inset 0 0 0 1.5px var(--gold); }
+.board i.glint::after { opacity:.1; }
+.board .pc { transition: left .62s cubic-bezier(.2,.7,.2,1), top .62s cubic-bezier(.2,.7,.2,1), opacity .3s ease, color .4s ease !important; }
+.board .pc.moving { z-index:2; }
+.says { min-height:3.2em; margin:16px auto 0; max-width:36ch; text-align:center; text-wrap:balance; font:14px/1.5 Geist, system-ui, sans-serif; }
+.stage.dark .says { color:#ece6d8; } .stage.light .says { color:#26262c; }
+.says .n { display:block; margin-bottom:4px; font:500 10px/1.4 "JetBrains Mono", monospace; letter-spacing:.16em; color:var(--gold); }
+.says .n, .says .t { transition: opacity .45s ease, transform .45s cubic-bezier(.2,.7,.2,1); }
+.says.out .n, .says.out .t { opacity:0; transform:translateY(4px); }
+.score { min-height:1.6em; margin:14px 0 0; text-align:center; letter-spacing:.08em; text-transform:none; }
+.score b { color:var(--gold); font-weight:500; }
+.score span { opacity:0; transition:opacity .3s ease; }
+.score span.on { opacity:1; }
+@media (prefers-reduced-motion: reduce) { .board i::after, .board .pc, .board .arrow, .board .head { transition:none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <p class="mono">LexTutor · scratch pad · 28 Oct</p>
+      <h1>The art belongs to the page</h1>
+      <p class="lede">Real screens at 1280 × 585, before and after. The drawings no longer bring their own background and are never painted over: their edges fade out with a mask. The board below is a concept, not yet in the app.</p>
+    </div>
+    <div class="seg" role="group" aria-label="Theme of the screens">
+      <button type="button" data-shot-theme="dark" aria-pressed="true">Dark</button>
+      <button type="button" data-shot-theme="light" aria-pressed="false">Light</button>
+    </div>
+  </header>
+
+  <section>
+    <p class="mono">01 · Home</p>
+    <h2>The haze under the header</h2>
+    <p class="why">Before, the page colour was painted over the colonnade in a long gradient, so half-faded hatching read as smoke. After, the drawing stops cleanly just under the header and the sky behind the headline is cleared with a short edge.</p>
+    <div class="pair" data-page="home"></div>
+  </section>
+
+  <section>
+    <p class="mono">02 · Lexa Points</p>
+    <h2>Lady Justice stands on the page</h2>
+    <p class="why">The dark plate's black is now the page's own, the panel takes the page colour, the painted vignette and the gold mount rule go, and the niche dissolves into the page around her. Light is unchanged.</p>
+    <div class="pair" data-page="lexa"></div>
+  </section>
+
+  <section>
+    <p class="mono">03 · Paper Practice</p>
+    <h2>No line through the hall</h2>
+    <p class="why">The hall stood cut off by the column's edge. It now fades out before the edge and before the words, and sits quieter in dark.</p>
+    <div class="pair" data-page="practice"></div>
+  </section>
+
+  <section>
+    <p class="mono">04 · Draft Lab</p>
+    <h2>The dome, the same way</h2>
+    <p class="why">The same mask as Paper Practice, so the two pages read as one family.</p>
+    <div class="pair" data-page="draft"></div>
+  </section>
+
+  <section>
+    <p class="mono">05 · Topic Drilldown · concept</p>
+    <h2>A board drawn in code, playing the variation</h2>
+    <p class="why">The hatched board turned to mud in dark. Drawn in the app's own colours it is crisp in both themes and plays the mate the 14 October rule gives each theme, the army at the viewer's edge delivering it: light, Scholar's Mate from White's side (1.e4 e5 2.Bc4 Nc6 3.Qh5 d6 4.Qxf7#); dark, Fool's Mate from Black's side (1.f3 e5 2.g4 Qh4#). The game is played from the opening position in four beats, and on each beat the board says one thing Topic Drilldown does; on the mating move the queen's square lights, her path draws, the square she lands on holds, the line she or her bishop holds lights square by square, and the king's square glows last. Then the floor breathes: a few tiles at a time warm faintly and fade.</p>
+    <div class="boards">
+      <div><div class="stage dark"><div class="board" data-board="fools"></div><p class="says" data-says="fools"><span class="n"></span><span class="t"></span></p><button class="replay" type="button">Replay</button></div><p class="cap mono">Dark · Fool's Mate from Black's side · 1.f3 e5 2.g4 Qh4#</p></div>
+      <div><div class="stage light"><div class="board" data-board="scholars"></div><p class="says" data-says="scholars"><span class="n"></span><span class="t"></span></p><button class="replay" type="button">Replay</button></div><p class="cap mono">Light · Scholar's Mate from White's side · 1.e4 e5 2.Bc4 Nc6 3.Qh5 d6 4.Qxf7#</p></div>
+    </div>
+  </section>
+</div>
+<script>
+  // Before / after pairs, in the chosen theme.
+  const pages = ["home", "lexa", "practice", "draft"];
+  function paint(theme) {
+    document.documentElement.dataset.theme = theme;
+    document.querySelectorAll("[data-shot-theme]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.shotTheme === theme)));
+    pages.forEach((p) => {
+      document.querySelector('[data-page="' + p + '"]').innerHTML =
+        '<figure><img src="art/' + p + '-' + theme + '-before.webp" alt="' + p + ' before, ' + theme + '" loading="lazy"><figcaption class="mono">Before</figcaption></figure>' +
+        '<figure><img src="art/' + p + '-' + theme + '-after.webp" alt="' + p + ' after, ' + theme + '" loading="lazy"><figcaption class="mono"><b>After</b></figcaption></figure>';
+    });
+  }
+  document.querySelectorAll("[data-shot-theme]").forEach((b) => b.addEventListener("click", () => paint(b.dataset.shotTheme)));
+  paint("dark");
+
+  // The boards. Each game is played from the opening position; the last move is the mate, given its marks.
+  // "flip" turns the board to Black's side.
+  const G = { K: "\u265A", Q: "\u265B", R: "\u265C", B: "\u265D", N: "\u265E", P: "\u265F" };
+  const START = (() => {
+    const o = {};
+    "abcdefgh".split("").forEach((f, i) => {
+      o[f + "1"] = ["w", "RNBQKBNR"[i]]; o[f + "2"] = ["w", "P"];
+      o[f + "7"] = ["b", "P"]; o[f + "8"] = ["b", "RNBQKBNR"[i]];
+    });
+    return o;
+  })();
+  const GAMES = {
+    // 1.e4 e5 2.Bc4 Nc6 3.Qh5 d6 4.Qxf7#: the bishop on c4 holds the queen's square.
+    scholars: { flip: false, moves: [["e2", "e4", "1.e4"], ["e7", "e5", "e5"], ["f1", "c4", "2.Bc4"], ["b8", "c6", "Nc6"], ["d1", "h5", "3.Qh5"], ["d7", "d6", "d6"], ["h5", "f7", "4.Qxf7#"]], line: ["c4", "d5", "e6"], king: "e8", beats: [[0, 1], [2, 3], [4, 5], [6]] },
+    // 1.f3 e5 2.g4 Qh4#: the queen holds the diagonal to the king.
+    fools: { flip: true, moves: [["f2", "f3", "1.f3"], ["e7", "e5", "e5"], ["g2", "g4", "2.g4"], ["d8", "h4", "Qh4#"]], line: ["g3", "f2"], king: "e1", beats: [[0], [1], [2], [3]] },
+  };
+  const SAYS = [
+    "The examiners have favourite openings.",
+    "Some moves they always force.",
+    "The pressure builds where the papers keep returning.",
+    "Practice assures victory.",
+  ];
+
+  const reduce = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const timers = new WeakMap();
+  function setup(board) {
+    const g = GAMES[board.dataset.board];
+    const xy = (sq) => { const f = sq.charCodeAt(0) - 97, r = Number(sq[1]); return g.flip ? [7 - f, r - 1] : [f, 8 - r]; };
+    let html = "";
+    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+      const f = g.flip ? 7 - x : x, r = g.flip ? y + 1 : 8 - y;
+      html += '<i data-sq="' + String.fromCharCode(97 + f) + r + '" class="' + ((x + y) % 2 ? "d" : "") + '"></i>';
+    }
+    Object.entries(START).forEach(([sq, [side, t]]) => {
+      const [x, y] = xy(sq);
+      html += '<span class="pc ' + side + '" data-at="' + sq + '" style="left:' + x * 12.5 + '%;top:' + y * 12.5 + '%">' + G[t] + '\uFE0E</span>';
+    });
+    // The mating move's path, drawn when it is played.
+    const [mf, mt] = g.moves[g.moves.length - 1];
+    const [x1, y1] = xy(mf), [x2, y2] = xy(mt);
+    const c = (v) => v * 100 + 50;
+    const len = Math.hypot(c(x2) - c(x1), c(y2) - c(y1)) - 30;
+    const ang = Math.atan2(c(y2) - c(y1), c(x2) - c(x1));
+    const ex = c(x1) + Math.cos(ang) * len, ey = c(y1) + Math.sin(ang) * len;
+    const pt = (a, d) => (ex + Math.cos(ang + a) * d).toFixed(1) + "," + (ey + Math.sin(ang + a) * d).toFixed(1);
+    html += '<svg viewBox="0 0 800 800" aria-hidden="true"><line class="arrow" style="--len:' + len.toFixed(0) + '" x1="' + c(x1) + '" y1="' + c(y1) + '" x2="' + ex.toFixed(1) + '" y2="' + ey.toFixed(1) + '"/>' +
+      '<polygon class="head" points="' + pt(0, 16) + " " + pt(Math.PI / 2, 9) + " " + pt(-Math.PI / 2, 9) + '"/></svg>';
+    board.innerHTML = html;
+    board.classList.remove("played");
+    // The score: white's moves carry the move number, the mate is in gold.
+    const says = document.querySelector('[data-says="' + board.dataset.board + '"]');
+    says.querySelector(".n").textContent = ""; says.querySelector(".t").textContent = "";
+    return { g, xy, says };
+  }
+  function play(board) {
+    (timers.get(board) || []).forEach(clearTimeout);
+    const { g, xy, says } = setup(board);
+    const t = [];
+    timers.set(board, t);
+    const sq = (s) => board.querySelector('i[data-sq="' + s + '"]');
+    const at = (ms, fn) => t.push(setTimeout(fn, reduce() ? 0 : ms));
+    const BEAT = 2600, PLY = 900;
+    const when = [];
+    g.beats.forEach((plies, b) => {
+      const start = 450 + b * BEAT;
+      at(start - 250, () => says.classList.add("out"));
+      at(start, () => {
+        says.querySelector(".n").textContent = "0" + (b + 1) + " / 0" + g.beats.length;
+        says.querySelector(".t").textContent = SAYS[b];
+        says.classList.remove("out");
+      });
+      plies.forEach((p, j) => when[p] = start + 200 + j * PLY);
+    });
+    g.moves.forEach(([from, to], i) => {
+      const last = i === g.moves.length - 1;
+      at(when[i], () => {
+        board.querySelectorAll("i.from, i.to").forEach((c) => c.classList.remove("from", "to", "gone"));
+        sq(from).classList.add("from");
+        const piece = board.querySelector('[data-at="' + from + '"]');
+        const taken = board.querySelector('[data-at="' + to + '"]');
+        const [x, y] = xy(to);
+        piece.classList.add("moving");
+        if (last) { piece.classList.add("actor"); board.classList.add("played"); }
+        requestAnimationFrame(() => { piece.style.left = x * 12.5 + "%"; piece.style.top = y * 12.5 + "%"; });
+        piece.dataset.at = to;
+        if (taken) { taken.dataset.at = ""; t.push(setTimeout(() => { taken.style.opacity = "0"; }, reduce() ? 0 : 420)); }
+      });
+      at(when[i] + 620, () => {
+        board.querySelector(".pc.moving")?.classList.remove("moving");
+        sq(from).classList.add("gone");
+        sq(to).classList.add("to");
+      });
+    });
+    // The mate's marks: the held line square by square, the king last; then the floor breathes.
+    const end = when[g.moves.length - 1] + 700;
+    g.line.forEach((s, i) => at(end + i * 170, () => sq(s).classList.add("line")));
+    at(end + 100 + g.line.length * 170, () => sq(g.king).classList.add("king"));
+    const floor = () => {
+      if (reduce() || !board.isConnected) return;
+      const free = [...board.querySelectorAll("i:not(.to):not(.line):not(.king):not(.from)")];
+      for (let k = 0; k < 2 + Math.round(Math.random()); k++) {
+        const cell = free[Math.floor(Math.random() * free.length)];
+        cell.classList.add("glint");
+        t.push(setTimeout(() => cell.classList.remove("glint"), 1500));
+      }
+      t.push(setTimeout(floor, 900 + Math.random() * 500));
+    };
+    at(end + 1100 + g.line.length * 170, floor);
+  }
+  document.querySelectorAll("[data-board]").forEach((board) => {
+    setup(board);
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting && e.intersectionRatio > 0.9)) { io.disconnect(); setTimeout(() => play(board), 250); } }, { threshold: [0.9, 1] });
+    io.observe(board);
+    board.parentElement.querySelector(".replay").addEventListener("click", () => play(board));
+  });
+</script>
+</body>
+</html>

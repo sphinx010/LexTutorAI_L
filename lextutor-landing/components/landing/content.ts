@@ -116,7 +116,7 @@ export const engine = {
       n: "II",
       name: "Decisions",
       body: "Typed checks that answer each requirement yes or no, before a word of feedback is written.",
-      status: "In development",
+      status: "Running",
     },
     {
       n: "III",
@@ -136,8 +136,8 @@ export const courses = {
   label: "Courses",
   heading: "Proven first on the Bar Finals.",
   rows: [
-    { name: "Civil Litigation", status: "Live", tags: ["Paper Practice", "Topic Drilldown", "Draft Lab", "Lexa Points"] },
-    { name: "Criminal Litigation", status: "In build", tags: ["Charge drafting", "Past papers 2013 to 2024"] },
+    { name: "Civil Litigation", status: "Live", tags: [] },
+    { name: "Criminal Litigation", status: "Live", tags: [] },
     { name: "Corporate Law Practice", status: "Next", tags: [] },
     { name: "Property Law Practice", status: "Next", tags: [] },
     { name: "Professional Ethics", status: "Next", tags: [] },
